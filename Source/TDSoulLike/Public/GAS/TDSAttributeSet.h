@@ -87,6 +87,8 @@ public:
     mutable FGGAttributeEvent OnOutOfArmor;
 
 protected:
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
     UFUNCTION()
     virtual void OnRep_Health(const FGameplayAttributeData& OldHealth);
 
