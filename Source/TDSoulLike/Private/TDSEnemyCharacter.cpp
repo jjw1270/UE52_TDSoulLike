@@ -28,6 +28,7 @@ void ATDSEnemyCharacter::BeginPlay()
 
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AttributeSet->GetHealthAttribute()).AddUObject(this, &ATDSEnemyCharacter::OnHealthAttributeChanged);
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AttributeSet->GetArmorAttribute()).AddUObject(this, &ATDSEnemyCharacter::OnArmorAttributeChanged);
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AttributeSet->GetChilledAttribute()).AddUObject(this, &ATDSEnemyCharacter::OnChilledAttributeChanged);
 
 	AttributeSet->OnOutOfHealth.AddUObject(this, &ATDSEnemyCharacter::OnOutOfHealthChanged);
 	AttributeSet->OnOutOfArmor.AddUObject(this, &ATDSEnemyCharacter::OnOutOfArmorChanged);
@@ -86,6 +87,11 @@ void ATDSEnemyCharacter::OnOutOfHealthChanged(AActor* DamageInstigator, AActor* 
 void ATDSEnemyCharacter::OnOutOfArmorChanged(AActor* DamageInstigator, AActor* DamageCauser, const FGameplayEffectSpec& DamageEffectSpec, float DamageMagnitude)
 {
 	OnOutOfArmor(DamageInstigator, DamageCauser, DamageEffectSpec, DamageMagnitude);
+}
+
+void ATDSEnemyCharacter::OnChilledAttributeChanged(const FOnAttributeChangeData& Data)
+{
+	OnChilledChanged(Data.OldValue, Data.NewValue);
 }
 
 void ATDSEnemyCharacter::PostInitializeComponents()

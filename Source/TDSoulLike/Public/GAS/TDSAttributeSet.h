@@ -51,6 +51,38 @@ public:
     FGameplayAttributeData InDamage;
     ATTRIBUTE_ACCESSORS(UTDSAttributeSet, InDamage);  //doesn't need OnRep_ because it is Instant attribute
 
+    UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_CritChance, Category = "Attributes", Meta = (AllowPrivateAccess = true))
+    FGameplayAttributeData CritChance;
+    ATTRIBUTE_ACCESSORS(UTDSAttributeSet, CritChance);
+
+    UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_CritMulti, Category = "Attributes", Meta = (AllowPrivateAccess = true))
+    FGameplayAttributeData CritMulti;
+    ATTRIBUTE_ACCESSORS(UTDSAttributeSet, CritMulti);
+
+    UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_LuckyChance, Category = "Attributes", Meta = (AllowPrivateAccess = true))
+    FGameplayAttributeData LuckyChance;
+    ATTRIBUTE_ACCESSORS(UTDSAttributeSet, LuckyChance);
+
+    UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_DamageAdd, Category = "Attributes", Meta = (AllowPrivateAccess = true))
+    FGameplayAttributeData DamageAdd;
+    ATTRIBUTE_ACCESSORS(UTDSAttributeSet, DamageAdd);
+
+    UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_DamageMulti, Category = "Attributes", Meta = (AllowPrivateAccess = true))
+    FGameplayAttributeData DamageMulti;
+    ATTRIBUTE_ACCESSORS(UTDSAttributeSet, DamageMulti);
+
+    UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Ammo, Category = "Attributes", Meta = (AllowPrivateAccess = true))
+    FGameplayAttributeData Ammo;
+    ATTRIBUTE_ACCESSORS(UTDSAttributeSet, Ammo);
+
+    UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Chilled, Category = "Attributes", Meta = (AllowPrivateAccess = true))
+    FGameplayAttributeData Chilled;
+    ATTRIBUTE_ACCESSORS(UTDSAttributeSet, Chilled);
+
+    UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_DeChill, Category = "Attributes", Meta = (AllowPrivateAccess = true))
+    FGameplayAttributeData DeChill;
+    ATTRIBUTE_ACCESSORS(UTDSAttributeSet, DeChill);
+
     mutable FGGAttributeEvent OnOutOfHealth;
     mutable FGGAttributeEvent OnOutOfArmor;
 
@@ -66,6 +98,30 @@ protected:
 
     UFUNCTION()
     virtual void OnRep_MaxArmor(const FGameplayAttributeData& OldMaxArmor);
+
+    UFUNCTION()
+    virtual void OnRep_CritChance(const FGameplayAttributeData& OldCritChance);
+
+    UFUNCTION()
+    virtual void OnRep_CritMulti(const FGameplayAttributeData& OldCritMulti);
+
+    UFUNCTION()
+    virtual void OnRep_LuckyChance(const FGameplayAttributeData& OldLuckyChance);
+
+    UFUNCTION()
+    virtual void OnRep_DamageAdd(const FGameplayAttributeData& OldDamageAdd);
+
+    UFUNCTION()
+    virtual void OnRep_DamageMulti(const FGameplayAttributeData& OldDamageMulti);
+
+    UFUNCTION()
+    virtual void OnRep_Ammo(const FGameplayAttributeData& OldAmmo);
+
+    UFUNCTION()
+    virtual void OnRep_Chilled(const FGameplayAttributeData& OldChilled);
+
+    UFUNCTION()
+    virtual void OnRep_DeChill(const FGameplayAttributeData& OldDeChill);
 
     bool bOutOfHealth;
     bool bOutOfArmor;

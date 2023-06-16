@@ -63,6 +63,12 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "GAS")
 	void OnOutOfArmor(AActor* DamageInstigator, AActor* DamageCauser, const FGameplayEffectSpec& DamageEffectSpec, float DamageMagnitude);
 
+
+	virtual void OnChilledAttributeChanged(const FOnAttributeChangeData& Data);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "GAS")
+	void OnChilledChanged(float OldValue, float NewValue);
+
 	virtual void PostInitializeComponents() override;
 
 public:	
