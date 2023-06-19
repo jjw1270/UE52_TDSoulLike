@@ -8,6 +8,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 
+#include "AI/TDSLPlayerAIController.h"
 #include "Player/TDSLPlayerState.h"
 #include "TDSLAbilitySystemComponent.h"
 #include "AttributeSets/TDSLAttributeSetBase.h"
@@ -41,19 +42,7 @@ ATDSLPlayerCharacter::ATDSLPlayerCharacter(const class FObjectInitializer& Objec
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionProfileName(FName("NoCollision"));
 
-	//UIFloatingStatusBarComponent = CreateDefaultSubobject<UWidgetComponent>(FName("UIFloatingStatusBarComponent"));
-	//UIFloatingStatusBarComponent->SetupAttachment(RootComponent);
-	//UIFloatingStatusBarComponent->SetRelativeLocation(FVector(0, 0, 120));
-	//UIFloatingStatusBarComponent->SetWidgetSpace(EWidgetSpace::Screen);
-	//UIFloatingStatusBarComponent->SetDrawSize(FVector2D(500, 500));
-	
-	//UIFloatingStatusBarClass = StaticLoadClass(UObject::StaticClass(), nullptr, TEXT("/Game/GASDocumentation/UI/UI_FloatingStatusBar_Hero.UI_FloatingStatusBar_Hero_C"));
-	//if (!UIFloatingStatusBarClass)
-	//{
-	//	UE_LOG(LogTemp, Error, TEXT("%s() Failed to find UIFloatingStatusBarClass. If it was moved, please update the reference location in C++."), *FString(__FUNCTION__));
-	//}
-
-	//AIControllerClass = AGDHeroAIController::StaticClass();
+	AIControllerClass = ATDSLPlayerAIController::StaticClass();
 
 	DeadTag = FGameplayTag::RequestGameplayTag(FName("State.Dead"));
 }
@@ -61,6 +50,17 @@ ATDSLPlayerCharacter::ATDSLPlayerCharacter(const class FObjectInitializer& Objec
 void ATDSLPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	// Set up action bindings
+	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
+
+		// Setup mouse input events
+		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Started, this, &ATDSLPlayerCharacter::OnSetDestinationStarted);
+		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Triggered, this, &ATDSLPlayerCharacter::OnSetDestinationAbility);
+
+		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Triggered, this, &ATDSLPlayerCharacter::OnDashAbility);
+
+	}
 
 	// Bind player input to the AbilitySystemComponent. Also called in OnRep_PlayerState because of a potential race condition.
 	BindASCInput();
@@ -103,44 +103,40 @@ void ATDSLPlayerCharacter::PossessedBy(AController* NewController)
 
 		AddCharacterAbilities();
 
-		//AGDPlayerController* PC = Cast<AGDPlayerController>(GetController());
-		//if (PC)
-		//{
-		//	PC->CreateHUD();
-		//}
-
-		//InitializeFloatingStatusBar();
+		ATDSLPlayerController* PC = Cast<ATDSLPlayerController>(GetController());
+		if (PC)
+		{
+			PC->CreateHUD();
+		}
 	}
-
-}
-
-USkeletalMeshComponent* ATDSLPlayerCharacter::GetWeaponComponent() const
-{
-	return WeaponComponent;
 }
 
 float ATDSLPlayerCharacter::GetBlockGage() const
 {
+	if (AttributeSetBase.IsValid())
+	{
+		return AttributeSetBase->GetBlockGage();
+	}
+
 	return 0.0f;
 }
 
 float ATDSLPlayerCharacter::GetMaxBlockGage() const
 {
-	return 0.0f;
-}
+	if (AttributeSetBase.IsValid())
+	{
+		return AttributeSetBase->GetMaxBlockGage();
+	}
 
-float ATDSLPlayerCharacter::GetBlockGageRegen() const
-{
-	return 0.0f;
-}
-
-float ATDSLPlayerCharacter::GetGold() const
-{
 	return 0.0f;
 }
 
 void ATDSLPlayerCharacter::SetBlockGage(float BlockGage)
 {
+	if (AttributeSetBase.IsValid())
+	{
+		AttributeSetBase->SetBlockGage(BlockGage);
+	}
 }
 
 void ATDSLPlayerCharacter::FinishDying()
@@ -168,54 +164,29 @@ void ATDSLPlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	//Add Input Mapping Context
-	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+	if (APlayerController* PC = Cast<APlayerController>(Controller))
 	{
-		Subsystem->AddMappingContext(DefaultMappingContext, 0);
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
+		{
+			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+		}
 	}
-
-
-
-	// Only needed for Heroes placed in world and when the player is the Server.
-	// On respawn, they are set up in PossessedBy.
-	// When the player a client, the floating status bars are all set up in OnRep_PlayerState.
-	// InitializeFloatingStatusBar();
 }
 
 void ATDSLPlayerCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
+	if (WeaponBackSocketName.IsNone())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("WeaponBackSocketName Empty"));
+		return;
+	}
+
 	if (WeaponComponent && GetMesh())
 	{
-		WeaponComponent->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("WeaponBackSocket"));
+		WeaponComponent->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponBackSocketName);
 	}
-}
-
-void ATDSLPlayerCharacter::InitializeFloatingStatusBar()
-{
-	//// Only create once
-	//if (UIFloatingStatusBar || !AbilitySystemComponent.IsValid())
-	//{
-	//	return;
-	//}
-
-	//// Setup UI for Locally Owned Players only, not AI or the server's copy of the PlayerControllers
-	//AGDPlayerController* PC = Cast<AGDPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-	//if (PC && PC->IsLocalPlayerController())
-	//{
-	//	if (UIFloatingStatusBarClass)
-	//	{
-	//		UIFloatingStatusBar = CreateWidget<UGDFloatingStatusBarWidget>(PC, UIFloatingStatusBarClass);
-	//		if (UIFloatingStatusBar && UIFloatingStatusBarComponent)
-	//		{
-	//			UIFloatingStatusBarComponent->SetWidget(UIFloatingStatusBar);
-
-	//			// Setup the floating status bar
-	//			UIFloatingStatusBar->SetHealthPercentage(GetHealth() / GetMaxHealth());
-	//			UIFloatingStatusBar->SetManaPercentage(GetMana() / GetMaxMana());
-	//		}
-	//	}
-	//}
 }
 
 // Client only
@@ -242,14 +213,11 @@ void ATDSLPlayerCharacter::OnRep_PlayerState()
 		// For now assume possession = spawn/respawn.
 		InitializeAttributes();
 
-		/*AGDPlayerController* PC = Cast<AGDPlayerController>(GetController());
+		ATDSLPlayerController* PC = Cast<ATDSLPlayerController>(GetController());
 		if (PC)
 		{
 			PC->CreateHUD();
-		}*/
-
-		// Simulated on proxies don't have their PlayerStates yet when BeginPlay is called so we call it again here
-		InitializeFloatingStatusBar();
+		}
 
 
 		// Respawn specific things that won't affect first possession.
@@ -272,5 +240,38 @@ void ATDSLPlayerCharacter::BindASCInput()
 			FString("CancelTarget"), AbilityEnumAssetPath, static_cast<int32>(ETDSLAbilityInputID::Confirm), static_cast<int32>(ETDSLAbilityInputID::Cancel)));
 
 		ASCInputBound = true;
+	}
+}
+
+void ATDSLPlayerCharacter::OnSetDestinationStarted()
+{
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		PC->StopMovement();
+	}
+}
+
+void ATDSLPlayerCharacter::OnSetDestinationAbility(const FInputActionValue& Value)
+{
+	SendAbilityLocalInput(Value, static_cast<int32>(ETDSLAbilityInputID::Move));
+}
+
+void ATDSLPlayerCharacter::OnDashAbility(const FInputActionValue& Value)
+{
+	SendAbilityLocalInput(Value, static_cast<int32>(ETDSLAbilityInputID::Dash));
+}
+
+void ATDSLPlayerCharacter::SendAbilityLocalInput(const FInputActionValue& Value, int32 InputID)
+{
+	if (AbilitySystemComponent.IsValid())
+		return;
+
+	if (Value.Get<bool>())
+	{
+		AbilitySystemComponent->AbilityLocalInputPressed(InputID);
+	}
+	else
+	{
+		AbilitySystemComponent->AbilityLocalInputReleased(InputID);
 	}
 }

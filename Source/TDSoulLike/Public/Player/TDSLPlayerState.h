@@ -8,7 +8,6 @@
 #include "GameplayEffectTypes.h"
 #include "TDSLPlayerState.generated.h"
 
-// This version of Player State has an Ability System Component and should be the base of any Player State sub-class when using GAS.
 UCLASS()
 class TDSOULLIKE_API ATDSLPlayerState : public APlayerState, public IAbilitySystemInterface
 {
@@ -29,7 +28,7 @@ public:
 	void ShowAbilityConfirmCancelText(bool ShowText);
 
 	/**
-	* Getters for attributes from TDSLPlayerAttributeSet. Returns Current Value unless otherwise specified.
+	* Getters for attributes from TDSLAttributeSetBase. Returns Current Value unless otherwise specified.
 	*/
 
 	UFUNCTION(BlueprintCallable, Category = "GAS|PlayerState|Attributes")
@@ -85,5 +84,4 @@ protected:
 	virtual void MaxBlockGageChanged(const FOnAttributeChangeData& Data);
 	virtual void BlockGageRegenRateChanged(const FOnAttributeChangeData& Data);
 	virtual void GoldChanged(const FOnAttributeChangeData& Data);
-
 };

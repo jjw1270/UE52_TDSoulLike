@@ -31,9 +31,12 @@ public:
 
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
-	// class UTDSLFloatingStatusBarWidget* GetFloatingStatusBar();
+	FORCEINLINE USkeletalMeshComponent* GetWeaponComponent() const { return WeaponComponent; }
 
-	USkeletalMeshComponent* GetWeaponComponent() const;
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	FName WeaponBackSocketName;
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	FName WeaponRightHandSocketName;
 
 	virtual void FinishDying() override;
 
@@ -42,12 +45,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "GAS|Chararcter|Attributes")
 	float GetMaxBlockGage() const;
-
-	UFUNCTION(BlueprintCallable, Category = "GAS|Chararcter|Attributes")
-	float GetBlockGageRegen() const;
-
-	UFUNCTION(BlueprintCallable, Category = "GAS|Chararcter|Attributes")
-	float GetGold() const;
 
 protected:
 	virtual void SetBlockGage(float BlockGage);
@@ -61,15 +58,6 @@ protected:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 	USkeletalMeshComponent* WeaponComponent;
 
-	//UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "GAS|UI")
-	//TSubclassOf<class UTDSLFloatingStatusBarWidget> UIFloatingStatusBarClass;
-
-	//UPROPERTY()
-	//class UTDSLFloatingStatusBarWidget* UIFloatingStatusBar;
-
-	//UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "GAS|UI")
-	//class UWidgetComponent* UIFloatingStatusBarComponent;
-
 	bool ASCInputBound = false;
 
 	FGameplayTag DeadTag;
@@ -78,11 +66,6 @@ protected:
 	virtual void BeginPlay() override;
 
 	virtual void PostInitializeComponents() override;
-
-	// Creates and initializes the floating status bar for heroes.
-	// Safe to call many times because it checks to make sure it only executes once.
-	UFUNCTION()
-	void InitializeFloatingStatusBar();
 
 	// Client only
 	virtual void OnRep_PlayerState() override;
@@ -120,4 +103,13 @@ private:
 	FVector CachedDestination;
 	// For how long it has been click pressed
 	float FollowTime;
+
+protected:
+	void OnSetDestinationStarted();
+	void OnSetDestinationAbility(const FInputActionValue& Value);
+
+	void OnDashAbility(const FInputActionValue& Value);
+
+	virtual void SendAbilityLocalInput(const FInputActionValue& Value, int32 InputID);
+
 };

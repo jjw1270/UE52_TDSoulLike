@@ -37,6 +37,10 @@ public:
 	// Removes all CharacterAbilities. Can only be called by the Server. Removing on the Server will remove from Client too.
 	virtual void RemoveCharacterAbilities();
 
+	/**
+	* Getters for attributes from TDSLAttributeSetBase
+	**/
+
 	UFUNCTION(BlueprintCallable, Category = "GAS|Chararcter|Attributes")
 	float GetHealth() const;
 
@@ -66,7 +70,6 @@ protected:
 	// Just make sure you test if the pointer is valid before using.
 	// I opted for TWeakObjectPtrs because I didn't want a shared hard reference here and I didn't want an extra function call of getting
 	// the ASC/AttributeSet from the PlayerState or child classes every time I referenced them in this base class.
-
 	TWeakObjectPtr<class UTDSLAbilitySystemComponent> AbilitySystemComponent;
 	TWeakObjectPtr<class UTDSLAttributeSetBase> AttributeSetBase;
 
@@ -108,5 +111,4 @@ protected:
 	*/
 
 	virtual void SetHealth(float Health);
-
 };

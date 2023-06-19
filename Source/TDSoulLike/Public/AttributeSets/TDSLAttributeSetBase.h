@@ -14,6 +14,9 @@
 	GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \
 	GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
 
+//Delegate used to broadcast attribute events.
+DECLARE_MULTICAST_DELEGATE_FourParams(FTDSLAttributeEvent, AActor* /*EffectInstigator*/, AActor* /*EffectCauser*/, const FGameplayEffectSpec& /*EffectSpec*/, float /*EffectMagnitute*/);
+
 UCLASS()
 class TDSOULLIKE_API UTDSLAttributeSetBase : public UAttributeSet
 {
@@ -81,6 +84,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Gold", ReplicatedUsing = OnRep_Gold)
 	FGameplayAttributeData Gold;
 	ATTRIBUTE_ACCESSORS(UTDSLAttributeSetBase, Gold)
+
+	mutable FTDSLAttributeEvent OnOutOfHealth;
+	mutable FTDSLAttributeEvent OnOutOfBlockGage;
 
 protected:
 	// Helper function to proportionally adjust the value of an attribute when it's associated max attribute changes.

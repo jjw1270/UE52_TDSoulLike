@@ -4,6 +4,8 @@
 #include "Player/TDSLPlayerState.h"
 #include "TDSLAbilitySystemComponent.h"
 #include "AttributeSets/TDSLAttributeSetBase.h"
+#include "Characters/TDSLPlayerCharacter.h"
+#include "Player/TDSLPlayerController.h"
 
 ATDSLPlayerState::ATDSLPlayerState()
 {	
@@ -27,7 +29,6 @@ ATDSLPlayerState::ATDSLPlayerState()
 
 	//cache tags
 	DeadTag = FGameplayTag::RequestGameplayTag(FName("State.Dead"));
-
 }
 
 UAbilitySystemComponent* ATDSLPlayerState::GetAbilitySystemComponent() const
@@ -109,28 +110,91 @@ void ATDSLPlayerState::BeginPlay()
 
 void ATDSLPlayerState::HealthChanged(const FOnAttributeChangeData& Data)
 {
+	float Health = Data.NewValue;
+
+	// Update floating status bar
+	//ATDSLPlayerCharacter* Player = Cast<ATDSLPlayerCharacter>(GetPawn());
+	//if (Player)
+	//{
+	//	UGDFloatingStatusBarWidget* PlayerFloatingStatusBar = Player->GetFloatingStatusBar();
+	//	if (HeroFloatingStatusBar)
+	//	{
+	//		HeroFloatingStatusBar->SetHealthPercentage(Health / GetMaxHealth());
+	//	}
+	//}
+
+	// Update the HUD
+	// Handled in the UI itself using the AsyncTaskAttributeChanged node as an example how to do it in Blueprint
+
+	// If the player died, handle death
+	//if (!IsAlive() && !AbilitySystemComponent->HasMatchingGameplayTag(DeadTag))
+	//{
+	//	if (Player)
+	//	{
+	//		Player->Die();
+	//	}
+	//}
 }
 
 void ATDSLPlayerState::MaxHealthChanged(const FOnAttributeChangeData& Data)
 {
+	float MaxHealth = Data.NewValue;
+
+	//// Update floating status bar
+	//ATDSLPlayerCharacter* Hero = Cast<ATDSLPlayerCharacter>(GetPawn());
+	//if (Hero)
+	//{
+	//	UGDFloatingStatusBarWidget* HeroFloatingStatusBar = Hero->GetFloatingStatusBar();
+	//	if (HeroFloatingStatusBar)
+	//	{
+	//		HeroFloatingStatusBar->SetHealthPercentage(GetHealth() / MaxHealth);
+	//	}
+	//}
+
+	//// Update the HUD
+	//ATDSLPlayerController* PC = Cast<ATDSLPlayerController>(GetOwner());
+	//if (PC)
+	//{
+	//	UGDHUDWidget* HUD = PC->GetHUD();
+	//	if (HUD)
+	//	{
+	//		HUD->SetMaxHealth(MaxHealth);
+	//	}
+	//}
 }
 
 void ATDSLPlayerState::HealthRegenRateChanged(const FOnAttributeChangeData& Data)
 {
+	float HealthRegenRate = Data.NewValue;
+
+	//// Update the HUD
+	//AGDPlayerController* PC = Cast<AGDPlayerController>(GetOwner());
+	//if (PC)
+	//{
+	//	UGDHUDWidget* HUD = PC->GetHUD();
+	//	if (HUD)
+	//	{
+	//		HUD->SetHealthRegenRate(HealthRegenRate);
+	//	}
+	//}
 }
 
 void ATDSLPlayerState::BlockGageChanged(const FOnAttributeChangeData& Data)
 {
+	float BlockGage = Data.NewValue;
 }
 
 void ATDSLPlayerState::MaxBlockGageChanged(const FOnAttributeChangeData& Data)
 {
+	float MaxBlockGage = Data.NewValue;
 }
 
 void ATDSLPlayerState::BlockGageRegenRateChanged(const FOnAttributeChangeData& Data)
 {
+	float BlockGageRegenRate = Data.NewValue;
 }
 
 void ATDSLPlayerState::GoldChanged(const FOnAttributeChangeData& Data)
 {
+	float Gold = Data.NewValue;
 }

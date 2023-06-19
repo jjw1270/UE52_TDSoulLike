@@ -10,11 +10,18 @@
 #include "AttributeSets/TDSLAttributeSetBase.h"
 
 // Sets default values
-ATDSLCharacterBase::ATDSLCharacterBase(const class FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+ATDSLCharacterBase::ATDSLCharacterBase(const class FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Overlap);
+
+	bAlwaysRelevant = true;
+
+	// Cache tags
+	DeadTag = FGameplayTag::RequestGameplayTag(FName("State.Dead"));
 }
 
 UAbilitySystemComponent* ATDSLCharacterBase::GetAbilitySystemComponent() const
@@ -180,7 +187,7 @@ void ATDSLCharacterBase::InitializeAttributes()
 
 void ATDSLCharacterBase::AddStartupEffects()
 {
-	if (GetLocalRole() != ROLE_Authority || !AbilitySystemComponent.IsValid() || AbilitySystemComponent->bStartupEffectsApplied)
+	if (GetLocalRole() != ROLE_Authority || !GetAbilitySystemComponent() || AbilitySystemComponent->bStartupEffectsApplied)
 	{
 		return;
 	}
