@@ -17,9 +17,9 @@ class TDSOULLIKE_API ATDSLPlayerController : public APlayerController
 public:
 	ATDSLPlayerController();
 
-	void CreateHUD();
+	//void CreateHUD();
 
-	class UTDSLHUDWidget* GetHUD();
+	//class UTDSLHUDWidget* GetHUD();
 
 
 

@@ -4,6 +4,7 @@
 #include "Characters/TDSLPlayerCharacter.h"
 #include "Player/TDSLPlayerController.h"
 
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -16,21 +17,30 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 
-#include "Blueprint/AIBlueprintHelperLibrary.h"
-
-#include "NiagaraSystem.h"
-#include "NiagaraFunctionLibrary.h"
-
 ATDSLPlayerCharacter::ATDSLPlayerCharacter(const class FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
+	// Don't rotate character to camera direction
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationYaw = false;
+	bUseControllerRotationRoll = false;
+
+	// Configure character movement
+	GetCharacterMovement()->bOrientRotationToMovement = true; // Rotate character to moving direction
+	GetCharacterMovement()->RotationRate = FRotator(0.f, 640.f, 0.f);
+	GetCharacterMovement()->bConstrainToPlane = true;
+	GetCharacterMovement()->bSnapToPlaneAtStart = true;
+
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(FName("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->bUsePawnControlRotation = true;
-	// CameraBoom->SetRelativeLocation(FVector(0, 0, 68.492264));
+	CameraBoom->SetUsingAbsoluteRotation(true); // Don't want arm to rotate when character does
+	CameraBoom->TargetArmLength = 2200.f;
+	CameraBoom->SetRelativeRotation(FRotator(-60.f, 0.f, 0.f));
+	CameraBoom->bDoCollisionTest = false; // Don't want to pull camera in when it collides with level
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(FName("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom);
-	// FollowCamera->FieldOfView = 80.0f;
+	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+	FollowCamera->FieldOfView = 55.0f;
 
 	WeaponComponent = CreateDefaultSubobject<USkeletalMeshComponent>(FName("Weapon"));
 
@@ -56,14 +66,16 @@ void ATDSLPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 		// Setup mouse input events
 		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Started, this, &ATDSLPlayerCharacter::OnSetDestinationStarted);
-		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Triggered, this, &ATDSLPlayerCharacter::OnSetDestinationAbility);
+		//EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Triggered, this, &ATDSLPlayerCharacter::OnSetDestinationTriggered);
+		//EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Canceled, this, &ATDSLPlayerCharacter::OnSetDestinationReleased);
+		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Completed, this, &ATDSLPlayerCharacter::OnSetDestinationReleased);
 
-		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Triggered, this, &ATDSLPlayerCharacter::OnDashAbility);
 
+		// EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Triggered, this, &ATDSLPlayerCharacter::OnDashAbility);
+
+		// Bind player input to the AbilitySystemComponent. Also called in OnRep_PlayerState because of a potential race condition.
+		BindASCInput();
 	}
-
-	// Bind player input to the AbilitySystemComponent. Also called in OnRep_PlayerState because of a potential race condition.
-	BindASCInput();
 }
 
 void ATDSLPlayerCharacter::PossessedBy(AController* NewController)
@@ -106,7 +118,7 @@ void ATDSLPlayerCharacter::PossessedBy(AController* NewController)
 		ATDSLPlayerController* PC = Cast<ATDSLPlayerController>(GetController());
 		if (PC)
 		{
-			PC->CreateHUD();
+			//PC->CreateHUD();
 		}
 	}
 }
@@ -216,7 +228,7 @@ void ATDSLPlayerCharacter::OnRep_PlayerState()
 		ATDSLPlayerController* PC = Cast<ATDSLPlayerController>(GetController());
 		if (PC)
 		{
-			PC->CreateHUD();
+			//PC->CreateHUD();
 		}
 
 
@@ -249,29 +261,37 @@ void ATDSLPlayerCharacter::OnSetDestinationStarted()
 	{
 		PC->StopMovement();
 	}
+	SendAbilityLocalInput(true, static_cast<int32>(ETDSLAbilityInputID::Move));
 }
 
-void ATDSLPlayerCharacter::OnSetDestinationAbility(const FInputActionValue& Value)
+void ATDSLPlayerCharacter::OnSetDestinationTriggered()
 {
-	SendAbilityLocalInput(Value, static_cast<int32>(ETDSLAbilityInputID::Move));
+	SendAbilityLocalInput(true, static_cast<int32>(ETDSLAbilityInputID::Move));
 }
 
-void ATDSLPlayerCharacter::OnDashAbility(const FInputActionValue& Value)
+void ATDSLPlayerCharacter::OnSetDestinationReleased()
 {
-	SendAbilityLocalInput(Value, static_cast<int32>(ETDSLAbilityInputID::Dash));
+	SendAbilityLocalInput(false, static_cast<int32>(ETDSLAbilityInputID::Move));
 }
 
-void ATDSLPlayerCharacter::SendAbilityLocalInput(const FInputActionValue& Value, int32 InputID)
+void ATDSLPlayerCharacter::OnDashAbility()
 {
-	if (AbilitySystemComponent.IsValid())
+	SendAbilityLocalInput(true, static_cast<int32>(ETDSLAbilityInputID::Dash));
+}
+
+void ATDSLPlayerCharacter::SendAbilityLocalInput(bool Value, int32 InputID)
+{
+	if (!AbilitySystemComponent.IsValid())
 		return;
 
-	if (Value.Get<bool>())
+	if (Value)
 	{
 		AbilitySystemComponent->AbilityLocalInputPressed(InputID);
+		UE_LOG(LogTemp, Warning, TEXT("Trigger"));
 	}
 	else
 	{
 		AbilitySystemComponent->AbilityLocalInputReleased(InputID);
+		UE_LOG(LogTemp, Warning, TEXT("Release"));
 	}
 }

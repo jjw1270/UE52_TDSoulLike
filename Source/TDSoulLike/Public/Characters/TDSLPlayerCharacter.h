@@ -49,10 +49,10 @@ public:
 protected:
 	virtual void SetBlockGage(float BlockGage);
 
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "GAS|Camera")
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = Camera)
 	class USpringArmComponent* CameraBoom;
 
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "GAS|Camera")
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = Camera)
 	class UCameraComponent* FollowCamera;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
@@ -76,14 +76,6 @@ protected:
 	void BindASCInput();
 
 private:
-	/** Time Threshold to know if it was a short press */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	float ShortPressThreshold;
-
-	/** FX Class that we will spawn when clicking */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UNiagaraSystem> FXCursor;
-
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputMappingContext> DefaultMappingContext;
@@ -100,16 +92,14 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> DashAction;
 
-	FVector CachedDestination;
-	// For how long it has been click pressed
-	float FollowTime;
-
 protected:
 	void OnSetDestinationStarted();
-	void OnSetDestinationAbility(const FInputActionValue& Value);
+	void OnSetDestinationTriggered();
+	void OnSetDestinationReleased();
 
-	void OnDashAbility(const FInputActionValue& Value);
 
-	virtual void SendAbilityLocalInput(const FInputActionValue& Value, int32 InputID);
+	void OnDashAbility();
+
+	virtual void SendAbilityLocalInput(bool Value, int32 InputID);
 
 };

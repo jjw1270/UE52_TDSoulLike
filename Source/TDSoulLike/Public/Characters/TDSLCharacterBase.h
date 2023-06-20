@@ -12,7 +12,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCharacterDiedDelegate, ATDSLCharacterBase*, Character);
 
 // This Class is Abstract and should not be used directly! (Not-Blueprintable)
-UCLASS(Abstract, NotBlueprintable)
+UCLASS()
 class TDSOULLIKE_API ATDSLCharacterBase : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()

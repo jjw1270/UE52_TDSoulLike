@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayAbility/TDSLGameplayAbility.h"
-#include "TDSLGA_Movement.generated.h"
+#include "GameFramework/GameModeBase.h"
+#include "TDSLGameModeBase.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TDSOULLIKE_API UTDSLGA_Movement : public UTDSLGameplayAbility
+class TDSOULLIKE_API ATDSLGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 	
