@@ -7,7 +7,7 @@
 #include "TDSLGA_PlayerMove.generated.h"
 
 /**
- * 
+ * This is an unfinished code. It will be implemented as a blueprint first and then written later.
  */
 UCLASS()
 class TDSOULLIKE_API UTDSLGA_PlayerMove : public UTDSLGameplayAbility
@@ -27,10 +27,10 @@ public:
 
 private:
 	UPROPERTY()
-	class ATDSLPlayerCharacter* PlayerCharacter;
+	class ACharacter* PlayerCharacter;
 
 	UPROPERTY()
-	class ATDSLPlayerController* PlayerController;
+	class APlayerController* PlayerController;
 
 	/** Time Threshold to know if it was a short press */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -44,5 +44,14 @@ private:
 	// For how long it has been click pressed
 	float FollowTime;
 
+	UFUNCTION()
 	void Move();
+
+	UPROPERTY()
+	class UAbilityTask_WaitInputRelease* ATWaitInputRelease;
+	
+	UPROPERTY()
+	class UTDSLAT_OnTick* AT_OnTick;
+
+	
 };

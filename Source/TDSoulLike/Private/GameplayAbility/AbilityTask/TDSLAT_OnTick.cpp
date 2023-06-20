@@ -1,0 +1,26 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "GameplayAbility/AbilityTask/TDSLAT_OnTick.h"
+
+UTDSLAT_OnTick::UTDSLAT_OnTick(const FObjectInitializer& ObjectInitializer)
+{
+	bTickingTask = true;
+}
+
+UTDSLAT_OnTick* UTDSLAT_OnTick::AbilityTaskOnTick(UGameplayAbility* OwningAbility, FName TaskInstanceName)
+{
+	UTDSLAT_OnTick* MyObj = NewAbilityTask<UTDSLAT_OnTick>(OwningAbility);
+	return MyObj;
+}
+
+void UTDSLAT_OnTick::Activate()
+{
+	Super::Activate();
+}
+
+void UTDSLAT_OnTick::TickTask(float DeltaTime)
+{
+	Super::TickTask(DeltaTime);
+	OnTick.Broadcast(DeltaTime);
+}

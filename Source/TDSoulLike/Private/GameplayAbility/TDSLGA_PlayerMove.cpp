@@ -2,10 +2,13 @@
 
 
 #include "GameplayAbility/TDSLGA_PlayerMove.h"
+#include "GameplayAbility/AbilityTask/TDSLAT_OnTick.h"
+#include "Abilities/Tasks/AbilityTask_WaitInputRelease.h"
+
 #include "TDSoulLike/TDSoulLike.h"
 
-#include "Characters/TDSLPlayerCharacter.h"
-#include "Player/TDSLPlayerController.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/Controller.h"
 
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 
@@ -28,8 +31,8 @@ void UTDSLGA_PlayerMove::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 			EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
 		}
 
-		PlayerCharacter = CastChecked<ATDSLPlayerCharacter>(ActorInfo->AvatarActor.Get());
-		PlayerController = Cast<ATDSLPlayerController>(PlayerCharacter->GetController());
+		PlayerCharacter = CastChecked<ACharacter>(ActorInfo->AvatarActor.Get());
+		PlayerController = CastChecked<APlayerController>(ActorInfo->PlayerController.Get());
 
 		if (!PlayerController)
 		{
@@ -37,8 +40,18 @@ void UTDSLGA_PlayerMove::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 			return;
 		}
 
+		if (!AT_OnTick)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("AT_OnTick nullptr"));
+			return;
+		}
 
-		
+		//ATWaitInputRelease = NewObject<UAbilityTask_WaitInputRelease>(this);
+		//ATWaitInputRelease->OnRelease.AddDynamic(this, &UTDSLGA_PlayerMove::Move);
+		//AT_OnTick = NewObject<UTDSLAT_OnTick>(this);
+
+		//AT_OnTick->OnTick.BindUFunction(this, FName("Move"));
+		//AT_OnTick->Activate();
 
 	}
 }
