@@ -6,9 +6,7 @@
 #include "GameplayAbility/TDSLGameplayAbility.h"
 #include "TDSLGA_PlayerMove.generated.h"
 
-/**
- * This is an unfinished code. It will be implemented as a blueprint first and then written later.
- */
+
 UCLASS()
 class TDSOULLIKE_API UTDSLGA_PlayerMove : public UTDSLGameplayAbility
 {

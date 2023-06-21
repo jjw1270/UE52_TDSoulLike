@@ -3,12 +3,11 @@
 
 #include "GameplayAbility/AbilityTask/TDSLAT_OnTick.h"
 
-
 #include UE_INLINE_GENERATED_CPP_BY_NAME(TDSLAT_OnTick)
 
 UTDSLAT_OnTick::UTDSLAT_OnTick(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	bTickingTask = 1;
+	bTickingTask = true;
 }
 
 UTDSLAT_OnTick* UTDSLAT_OnTick::AbilityTaskOnTick(UGameplayAbility* OwningAbility, FName TaskInstanceName)

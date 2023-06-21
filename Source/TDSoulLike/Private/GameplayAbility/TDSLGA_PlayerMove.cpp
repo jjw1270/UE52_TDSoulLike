@@ -3,11 +3,10 @@
 
 #include "GameplayAbility/TDSLGA_PlayerMove.h"
 #include "GameplayAbility/AbilityTask/TDSLAT_OnTick.h"
-#include "GameplayAbility/AbilityTask/TDSLAT_WaitPlayerMoveToLocation.h"
 #include "TDSoulLike/TDSoulLike.h"
+#include "AbilitySystemComponent.h"
 
 #include "GameFramework/Character.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
 
 #include "Blueprint/AIBlueprintHelperLibrary.h"
@@ -49,7 +48,7 @@ bool UTDSLGA_PlayerMove::CanActivateAbility(const FGameplayAbilitySpecHandle Han
 	{
 		return false;
 	}
-
+	
 	return true;
 }
 
@@ -104,6 +103,7 @@ void UTDSLGA_PlayerMove::OnMovementStop(const FGameplayAbilitySpecHandle Handle,
 	if (PlayerCharacter->GetVelocity().Equals(FVector::ZeroVector))
 	{
 		// UE_LOG(LogTemp, Warning, TEXT("Move Stopped"));
+		////////////////////////////////////////////////////////////////////////
 		CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
 	}
 	//else

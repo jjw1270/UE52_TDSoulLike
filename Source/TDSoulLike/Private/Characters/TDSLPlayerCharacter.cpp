@@ -66,10 +66,7 @@ void ATDSLPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 		// Setup mouse input events
 		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Started, this, &ATDSLPlayerCharacter::OnSetDestinationStarted);
-		//EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Triggered, this, &ATDSLPlayerCharacter::OnSetDestinationTriggered);
-		//EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Canceled, this, &ATDSLPlayerCharacter::OnSetDestinationReleased);
 		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Completed, this, &ATDSLPlayerCharacter::OnSetDestinationReleased);
-
 
 		// EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Triggered, this, &ATDSLPlayerCharacter::OnDashAbility);
 
