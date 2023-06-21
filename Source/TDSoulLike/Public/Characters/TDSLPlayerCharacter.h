@@ -94,7 +94,6 @@ private:
 
 protected:
 	void OnSetDestinationStarted();
-	void OnSetDestinationTriggered();
 	void OnSetDestinationReleased();
 
 

@@ -3,8 +3,10 @@
 
 #include "GameplayAbility/TDSLGA_PlayerMove.h"
 #include "GameplayAbility/AbilityTask/TDSLAT_OnTick.h"
+#include "GameplayAbility/AbilityTask/TDSLAT_WaitPlayerStop.h"
+
 #include "TDSoulLike/TDSoulLike.h"
-#include "AbilitySystemComponent.h"
+#include "TDSLAbilitySystemComponent.h"
 
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerController.h"
@@ -17,7 +19,6 @@
 UTDSLGA_PlayerMove::UTDSLGA_PlayerMove()
 {
 	AbilityInputID = ETDSLAbilityInputID::Move;
-	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
 	AbilityTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Ability.PlayerMove")));
 	ActivationOwnedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Ability.PlayerMove")));
 }
@@ -39,6 +40,9 @@ void UTDSLGA_PlayerMove::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 		ATOnTick = UTDSLAT_OnTick::AbilityTaskOnTick(this, FName());
 		ATOnTick->OnTick.AddDynamic(this, &UTDSLGA_PlayerMove::Move);
 		ATOnTick->ReadyForActivation();
+
+		ATWaitPlayerStop = UTDSLAT_WaitPlayerStop::CreateWaitVelocityChange(this, FName());
+		ATWaitPlayerStop->OnVelocityChage.AddDynamic(this, &UTDSLGA_PlayerMove::OnMovementStop);
 	}
 }
 
@@ -60,9 +64,7 @@ void UTDSLGA_PlayerMove::InputReleased(const FGameplayAbilitySpecHandle Handle, 
 		UAIBlueprintHelperLibrary::SimpleMoveToLocation(PlayerController, CachedDestination);
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, FXCursor, CachedDestination, FRotator::ZeroRotator, FVector(1.f, 1.f, 1.f), true, true, ENCPoolMethod::None, true);
 
-		OnMovementStopDelegate.BindUObject(this, &UTDSLGA_PlayerMove::OnMovementStop, Handle, ActorInfo, ActivationInfo, true);
-
-		GetWorld()->GetTimerManager().SetTimer(GetMovementStopHandle, OnMovementStopDelegate, 0.3f, true);
+		ATWaitPlayerStop->ReadyForActivation();
 	}
 }
 
@@ -75,8 +77,6 @@ void UTDSLGA_PlayerMove::CancelAbility(const FGameplayAbilitySpecHandle Handle, 
 	}
 
 	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
-
-	GetWorld()->GetTimerManager().ClearTimer(GetMovementStopHandle);
 }
 
 void UTDSLGA_PlayerMove::Move(float DeltaTime)
@@ -98,16 +98,8 @@ void UTDSLGA_PlayerMove::Move(float DeltaTime)
 	PlayerCharacter->AddMovementInput(WorldDirection, 1.0, false);
 }
 
-void UTDSLGA_PlayerMove::OnMovementStop(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancelAbility)
+void UTDSLGA_PlayerMove::OnMovementStop()
 {
-	if (PlayerCharacter->GetVelocity().Equals(FVector::ZeroVector))
-	{
-		// UE_LOG(LogTemp, Warning, TEXT("Move Stopped"));
-		////////////////////////////////////////////////////////////////////////
-		CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
-	}
-	//else
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("Navi Moving"));
-	//}
+	UE_LOG(LogTemp, Warning, TEXT("Stop"));
+	CancelAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true);
 }

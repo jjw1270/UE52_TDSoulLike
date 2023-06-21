@@ -42,9 +42,9 @@ private:
 	UFUNCTION()
 	void Move(float DeltaTime);
 
-	FTimerHandle GetMovementStopHandle;
-	FTimerDelegate OnMovementStopDelegate;
+	UPROPERTY()
+	class UTDSLAT_WaitPlayerStop* ATWaitPlayerStop;
 
-	void OnMovementStop(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancelAbility);
-
+	UFUNCTION()
+	void OnMovementStop();
 };

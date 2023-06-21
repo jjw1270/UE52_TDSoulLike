@@ -10,9 +10,11 @@
 #include "Components/CapsuleComponent.h"
 
 #include "AI/TDSLPlayerAIController.h"
+
 #include "Player/TDSLPlayerState.h"
 #include "TDSLAbilitySystemComponent.h"
 #include "AttributeSets/TDSLAttributeSetBase.h"
+#include "GameplayAbility/TDSLGA_PlayerMove.h"
 
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -254,15 +256,11 @@ void ATDSLPlayerCharacter::BindASCInput()
 
 void ATDSLPlayerCharacter::OnSetDestinationStarted()
 {
-	if (APlayerController* PC = Cast<APlayerController>(GetController()))
-	{
-		PC->StopMovement();
-	}
-	SendAbilityLocalInput(true, static_cast<int32>(ETDSLAbilityInputID::Move));
-}
+	FGameplayAbilitySpec* Spec = GetAbilitySystemComponent()->FindAbilitySpecFromInputID(static_cast<int32>(ETDSLAbilityInputID::Move));
+	GetAbilitySystemComponent()->CancelAbilityHandle(Spec->Handle);
 
-void ATDSLPlayerCharacter::OnSetDestinationTriggered()
-{
+	GetController()->StopMovement();
+
 	SendAbilityLocalInput(true, static_cast<int32>(ETDSLAbilityInputID::Move));
 }
 

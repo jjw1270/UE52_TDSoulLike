@@ -25,4 +25,7 @@ public:
 	// Called from TDSLDamageExecCalculation. Broadcasts on ReceivedDamage whenever this ASC receives damage.
 	virtual void ReceiveDamage(UTDSLAbilitySystemComponent* SourceASC, float UnmitigatedDamage, float MitigatedDamage);
 
+	virtual bool IsAbilityActive(const FGameplayTagContainer* WithTags, const FGameplayTagContainer* WithoutTags, UGameplayAbility* Ignore);
+	virtual bool IsAbilityActive(const FGameplayAbilitySpecHandle& InHandle);
+
 };
