@@ -26,8 +26,8 @@ void UTDSLAttributeSetBase::PreAttributeChange(const FGameplayAttribute& Attribu
 	}
 	else if (Attribute == GetMoveSpeedAttribute())
 	{
-		// Cannot slow less than MinMoveSpeed units/s and cannot boost more than MaxMoveSpeed units/s
-		NewValue = FMath::Clamp<float>(NewValue, MinMoveSpeed, MaxMoveSpeed);
+		// Cannot slow less than 100 units/s and cannot boost more than 600 units/s
+		NewValue = FMath::Clamp<float>(NewValue, 100, 600);
 	}
 }
 

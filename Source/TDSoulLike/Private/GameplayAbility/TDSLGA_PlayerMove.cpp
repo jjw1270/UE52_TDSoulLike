@@ -3,12 +3,12 @@
 
 #include "GameplayAbility/TDSLGA_PlayerMove.h"
 #include "GameplayAbility/AbilityTask/TDSLAT_OnTick.h"
-#include "Abilities/Tasks/AbilityTask_WaitInputRelease.h"
-
+#include "GameplayAbility/AbilityTask/TDSLAT_WaitPlayerMoveToLocation.h"
 #include "TDSoulLike/TDSoulLike.h"
 
 #include "GameFramework/Character.h"
-#include "GameFramework/Controller.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/PlayerController.h"
 
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 
@@ -20,10 +20,13 @@ UTDSLGA_PlayerMove::UTDSLGA_PlayerMove()
 	AbilityInputID = ETDSLAbilityInputID::Move;
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
 	AbilityTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Ability.PlayerMove")));
+	ActivationOwnedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Ability.PlayerMove")));
 }
 
 void UTDSLGA_PlayerMove::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
+	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+
 	if (HasAuthorityOrPredictionKey(ActorInfo, &ActivationInfo))
 	{
 		if (!CommitAbility(Handle, ActorInfo, ActivationInfo))
@@ -32,27 +35,11 @@ void UTDSLGA_PlayerMove::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 		}
 
 		PlayerCharacter = CastChecked<ACharacter>(ActorInfo->AvatarActor.Get());
-		PlayerController = CastChecked<APlayerController>(ActorInfo->PlayerController.Get());
+		PlayerController = CastChecked<APlayerController>(ActorInfo->PlayerController);
 
-		if (!PlayerController)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("pc nullptr"));
-			return;
-		}
-
-		if (!AT_OnTick)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("AT_OnTick nullptr"));
-			return;
-		}
-
-		//ATWaitInputRelease = NewObject<UAbilityTask_WaitInputRelease>(this);
-		//ATWaitInputRelease->OnRelease.AddDynamic(this, &UTDSLGA_PlayerMove::Move);
-		//AT_OnTick = NewObject<UTDSLAT_OnTick>(this);
-
-		//AT_OnTick->OnTick.BindUFunction(this, FName("Move"));
-		//AT_OnTick->Activate();
-
+		ATOnTick = UTDSLAT_OnTick::AbilityTaskOnTick(this, FName());
+		ATOnTick->OnTick.AddDynamic(this, &UTDSLGA_PlayerMove::Move);
+		ATOnTick->ReadyForActivation();
 	}
 }
 
@@ -70,7 +57,13 @@ void UTDSLGA_PlayerMove::InputReleased(const FGameplayAbilitySpecHandle Handle, 
 {
 	if (ActorInfo != NULL && ActorInfo->AvatarActor != NULL)
 	{
-		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
+		ATOnTick->EndTask();
+		UAIBlueprintHelperLibrary::SimpleMoveToLocation(PlayerController, CachedDestination);
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, FXCursor, CachedDestination, FRotator::ZeroRotator, FVector(1.f, 1.f, 1.f), true, true, ENCPoolMethod::None, true);
+
+		OnMovementStopDelegate.BindUObject(this, &UTDSLGA_PlayerMove::OnMovementStop, Handle, ActorInfo, ActivationInfo, true);
+
+		GetWorld()->GetTimerManager().SetTimer(GetMovementStopHandle, OnMovementStopDelegate, 0.3f, true);
 	}
 }
 
@@ -84,22 +77,11 @@ void UTDSLGA_PlayerMove::CancelAbility(const FGameplayAbilitySpecHandle Handle, 
 
 	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
 
-
-
-	UAIBlueprintHelperLibrary::SimpleMoveToLocation(PlayerController, CachedDestination);
-	// We move there and spawn some particles
-	UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, FXCursor, CachedDestination, FRotator::ZeroRotator, FVector(1.f, 1.f, 1.f), true, true, ENCPoolMethod::None, true);
-	//// If it was a short press
-	//if (FollowTime <= ShortPressThreshold)
-	//{ }
-	//FollowTime = 0.f;
+	GetWorld()->GetTimerManager().ClearTimer(GetMovementStopHandle);
 }
 
-void UTDSLGA_PlayerMove::Move()
+void UTDSLGA_PlayerMove::Move(float DeltaTime)
 {
-	// We flag that the input is being pressed
-	//FollowTime += GetWorld()->GetDeltaSeconds();
-
 	// We look for the location in the world where the player has pressed the input
 	FHitResult Hit;
 	bool bHitSuccessful = PlayerController->GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, true, Hit);
@@ -115,4 +97,17 @@ void UTDSLGA_PlayerMove::Move()
 
 	// Move to Target
 	PlayerCharacter->AddMovementInput(WorldDirection, 1.0, false);
+}
+
+void UTDSLGA_PlayerMove::OnMovementStop(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancelAbility)
+{
+	if (PlayerCharacter->GetVelocity().Equals(FVector::ZeroVector))
+	{
+		// UE_LOG(LogTemp, Warning, TEXT("Move Stopped"));
+		CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
+	}
+	//else
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("Navi Moving"));
+	//}
 }

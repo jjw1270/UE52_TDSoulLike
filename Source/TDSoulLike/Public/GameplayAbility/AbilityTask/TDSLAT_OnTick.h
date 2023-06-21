@@ -15,12 +15,12 @@ UCLASS()
 class TDSOULLIKE_API UTDSLAT_OnTick : public UAbilityTask
 {
 	GENERATED_BODY()
-	
-	UPROPERTY(BlueprintAssignable)
-	FOnTickTaskDelegate OnTick;
 
 public:
 	UTDSLAT_OnTick(const FObjectInitializer& ObjectInitializer);
+
+	UPROPERTY(BlueprintAssignable)
+	FOnTickTaskDelegate OnTick;
 
 	UFUNCTION(BlueprintCallable, Category = "Ability|Tasks", meta = (HidePin = "OwningAbility", DefaultToSelf = "OwningAbility", BlueprintInternalUseOnly = "TRUE"))
 	static UTDSLAT_OnTick* AbilityTaskOnTick(

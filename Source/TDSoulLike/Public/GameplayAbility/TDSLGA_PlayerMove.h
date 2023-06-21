@@ -13,7 +13,7 @@ UCLASS()
 class TDSOULLIKE_API UTDSLGA_PlayerMove : public UTDSLGameplayAbility
 {
 	GENERATED_BODY()
-	
+		
 public:
 	UTDSLGA_PlayerMove();
 
@@ -32,26 +32,21 @@ private:
 	UPROPERTY()
 	class APlayerController* PlayerController;
 
-	/** Time Threshold to know if it was a short press */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	float ShortPressThreshold;
-
 	/** FX Class that we will spawn when clicking */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UNiagaraSystem> FXCursor;
 
 	FVector CachedDestination;
-	// For how long it has been click pressed
-	float FollowTime;
+	
+	UPROPERTY()
+	class UTDSLAT_OnTick* ATOnTick;
 
 	UFUNCTION()
-	void Move();
+	void Move(float DeltaTime);
 
-	UPROPERTY()
-	class UAbilityTask_WaitInputRelease* ATWaitInputRelease;
-	
-	UPROPERTY()
-	class UTDSLAT_OnTick* AT_OnTick;
+	FTimerHandle GetMovementStopHandle;
+	FTimerDelegate OnMovementStopDelegate;
 
-	
+	void OnMovementStop(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancelAbility);
+
 };

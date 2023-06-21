@@ -75,11 +75,6 @@ public:
 	FGameplayAttributeData MoveSpeed;
 	ATTRIBUTE_ACCESSORS(UTDSLAttributeSetBase, MoveSpeed)
 
-	UPROPERTY(EditDefaultsOnly, Category = "MoveSpeed")
-	float MinMoveSpeed;
-	UPROPERTY(EditDefaultsOnly, Category = "MoveSpeed")
-	float MaxMoveSpeed;
-
 	// Gold gained from killing enemies. Used to purchase items
 	UPROPERTY(BlueprintReadOnly, Category = "Gold", ReplicatedUsing = OnRep_Gold)
 	FGameplayAttributeData Gold;
