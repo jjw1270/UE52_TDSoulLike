@@ -4,7 +4,13 @@
 
 # Inputs
 
-- move              : Mouse Right Click
+- move 		: Mouse Right Click
 - GetTargetInfo     : Mouse Left Click
-- Block             : Left Shift
-- Dash              : Space
+- Sprint             	: Left Shift
+- Dash             	: Space
+- Default Atk     	: A
+- Smash Atk      	: S
+- Special Skill	: D
+- Block		: F
+- Interaction	: E
+- Change Posture	: Q
