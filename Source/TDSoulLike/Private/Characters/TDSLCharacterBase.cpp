@@ -3,7 +3,7 @@
 
 #include "Characters/TDSLCharacterBase.h"
 #include "Components/CapsuleComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
+#include "Characters/TDSLCharacterMovementComponent.h"
 
 #include "TDSLAbilitySystemComponent.h"
 #include "GameplayAbility/TDSLGameplayAbility.h"
@@ -11,7 +11,7 @@
 
 // Sets default values
 ATDSLCharacterBase::ATDSLCharacterBase(const class FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UTDSLCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
