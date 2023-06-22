@@ -17,11 +17,9 @@ class TDSOULLIKE_API ATDSLPlayerController : public APlayerController
 public:
 	ATDSLPlayerController();
 
-	//void CreateHUD();
+	void CreateHUD();
 
-	//class UTDSLHUDWidget* GetHUD();
-
-
+	class UTDSLHUDWidget* GetHUD();
 
 protected:
 	/** True if the controlled character should navigate to the mouse cursor. */

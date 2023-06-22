@@ -117,7 +117,7 @@ void ATDSLPlayerCharacter::PossessedBy(AController* NewController)
 		ATDSLPlayerController* PC = Cast<ATDSLPlayerController>(GetController());
 		if (PC)
 		{
-			//PC->CreateHUD();
+			PC->CreateHUD();
 		}
 	}
 }
@@ -227,7 +227,7 @@ void ATDSLPlayerCharacter::OnRep_PlayerState()
 		ATDSLPlayerController* PC = Cast<ATDSLPlayerController>(GetController());
 		if (PC)
 		{
-			//PC->CreateHUD();
+			PC->CreateHUD();
 		}
 
 

@@ -36,6 +36,17 @@ void UTDSLAttributeSetBase::PostGameplayEffectExecute(const FGameplayEffectModCa
 	Super::PostGameplayEffectExecute(Data);
 
 	// TODO -- Add some logic after Gameplay Effect executed
+		if (Data.EvaluatedData.Attribute == GetHealthAttribute())
+		{
+			// Handle other health changes.
+			// Health loss should go through Damage.
+			SetHealth(FMath::Clamp(GetHealth(), 0.0f, GetMaxHealth()));
+		} // Health
+		else if (Data.EvaluatedData.Attribute == GetBlockGageAttribute())
+		{
+			// Handle BlockGage changes.
+			SetBlockGage(FMath::Clamp(GetBlockGage(), 0.0f, GetMaxBlockGage()));
+		} // BlockGage
 }
 
 void UTDSLAttributeSetBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
