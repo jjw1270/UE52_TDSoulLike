@@ -23,6 +23,7 @@ ATDSLCharacterBase::ATDSLCharacterBase(const class FObjectInitializer& ObjectIni
 
 	// Cache tags
 	DeadTag = FGameplayTag::RequestGameplayTag(FName("State.Dead"));
+	EffectRemoveOnDeathTag = FGameplayTag::RequestGameplayTag(FName("Effect.RemoveOnDeath"));
 }
 
 UAbilitySystemComponent* ATDSLCharacterBase::GetAbilitySystemComponent() const

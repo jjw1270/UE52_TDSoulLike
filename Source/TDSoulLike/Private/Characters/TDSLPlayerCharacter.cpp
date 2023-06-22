@@ -70,7 +70,8 @@ void ATDSLPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Started, this, &ATDSLPlayerCharacter::OnSetDestinationStarted);
 		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Completed, this, &ATDSLPlayerCharacter::OnSetDestinationReleased);
 
-		// EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Triggered, this, &ATDSLPlayerCharacter::OnDashAbility);
+		EnhancedInputComponent->BindAction(SwitchPostureAction, ETriggerEvent::Started, this, &ATDSLPlayerCharacter::OnSwitchPostureStarted);
+		EnhancedInputComponent->BindAction(SwitchPostureAction, ETriggerEvent::Completed, this, &ATDSLPlayerCharacter::OnSwitchPostureReleased);
 
 		// Bind player input to the AbilitySystemComponent. Also called in OnRep_PlayerState because of a potential race condition.
 		BindASCInput();
@@ -147,6 +148,18 @@ void ATDSLPlayerCharacter::SetBlockGage(float BlockGage)
 	if (AttributeSetBase.IsValid())
 	{
 		AttributeSetBase->SetBlockGage(BlockGage);
+	}
+}
+
+void ATDSLPlayerCharacter::AttachWeapon(const bool bIsAttachToHand)
+{
+	if (bIsAttachToHand)
+	{
+		WeaponComponent->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, WeaponRightHandSocketName);
+	}
+	else
+	{
+		WeaponComponent->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, WeaponBackSocketName);
 	}
 }
 
@@ -269,9 +282,14 @@ void ATDSLPlayerCharacter::OnSetDestinationReleased()
 	SendAbilityLocalInput(false, static_cast<int32>(ETDSLAbilityInputID::Move));
 }
 
-void ATDSLPlayerCharacter::OnDashAbility()
+void ATDSLPlayerCharacter::OnSwitchPostureStarted()
 {
-	SendAbilityLocalInput(true, static_cast<int32>(ETDSLAbilityInputID::Dash));
+	SendAbilityLocalInput(true, static_cast<int32>(ETDSLAbilityInputID::SwitchPose));
+}
+
+void ATDSLPlayerCharacter::OnSwitchPostureReleased()
+{
+	SendAbilityLocalInput(false, static_cast<int32>(ETDSLAbilityInputID::SwitchPose));
 }
 
 void ATDSLPlayerCharacter::SendAbilityLocalInput(bool Value, int32 InputID)

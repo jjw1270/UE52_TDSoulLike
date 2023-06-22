@@ -38,6 +38,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	FName WeaponRightHandSocketName;
 
+	UFUNCTION(BlueprintCallable)
+	void AttachWeapon(const bool bIsAttachToHand);
+
 	virtual void FinishDying() override;
 
 	UFUNCTION(BlueprintCallable, Category = "GAS|Chararcter|Attributes")
@@ -84,9 +87,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> SetDestinationClickAction;
 
-	/** Block Action */
+	/** SwitchPosture Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputAction> BlockAction;
+	TObjectPtr<UInputAction> SwitchPostureAction;
 
 	/** Dash Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -96,8 +99,8 @@ protected:
 	void OnSetDestinationStarted();
 	void OnSetDestinationReleased();
 
-
-	void OnDashAbility();
+	void OnSwitchPostureStarted();
+	void OnSwitchPostureReleased();
 
 	virtual void SendAbilityLocalInput(bool Value, int32 InputID);
 

@@ -26,7 +26,7 @@ enum class ETDSLAbilityInputID : uint8
 
 	Ability4			UMETA(DisplayName = "Ability4"),
 
-	Ability5			UMETA(DisplayName = "Ability5"),
+	SwitchPose			UMETA(DisplayName = "SwitchPose"),
 
 	Move				UMETA(DisplayName = "Move"),
 
