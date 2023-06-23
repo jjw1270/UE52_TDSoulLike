@@ -21,6 +21,7 @@ UTDSLGA_PlayerMove::UTDSLGA_PlayerMove()
 	AbilityInputID = ETDSLAbilityInputID::Move;
 	AbilityTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Ability.PlayerMove")));
 	ActivationOwnedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Ability.PlayerMove")));
+
 }
 
 void UTDSLGA_PlayerMove::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)

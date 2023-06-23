@@ -41,6 +41,15 @@ public:
 	float GetHealthRegenRate() const;
 
 	UFUNCTION(BlueprintCallable, Category = "GAS|PlayerState|Attributes")
+	float GetStamina() const;
+
+	UFUNCTION(BlueprintCallable, Category = "GAS|PlayerState|Attributes")
+	float GetMaxStamina() const;
+
+	UFUNCTION(BlueprintCallable, Category = "GAS|PlayerState|Attributes")
+	float GetStaminaRegenRate() const;
+
+	UFUNCTION(BlueprintCallable, Category = "GAS|PlayerState|Attributes")
 	float GetBlockGage() const;
 
 	UFUNCTION(BlueprintCallable, Category = "GAS|PlayerState|Attributes")
@@ -68,6 +77,9 @@ protected:
 	FDelegateHandle HealthChangedDelegateHandle;
 	FDelegateHandle MaxHealthChangedDelegateHandle;
 	FDelegateHandle HealthRegenRateChangedDelegateHandle;
+	FDelegateHandle StaminaChangedDelegateHandle;
+	FDelegateHandle MaxStaminaChangedDelegateHandle;
+	FDelegateHandle StaminaRegenRateChangedDelegateHandle;
 	FDelegateHandle BlockGageChangedDelegateHandle;
 	FDelegateHandle MaxBlockGageChangedDelegateHandle;
 	FDelegateHandle BlockGageRegenRateChangedDelegateHandle;
@@ -80,6 +92,9 @@ protected:
 	virtual void HealthChanged(const FOnAttributeChangeData& Data);
 	virtual void MaxHealthChanged(const FOnAttributeChangeData& Data);
 	virtual void HealthRegenRateChanged(const FOnAttributeChangeData& Data);
+	virtual void StaminaChanged(const FOnAttributeChangeData& Data);
+	virtual void MaxStaminaChanged(const FOnAttributeChangeData& Data);
+	virtual void StaminaRegenRateChanged(const FOnAttributeChangeData& Data);
 	virtual void BlockGageChanged(const FOnAttributeChangeData& Data);
 	virtual void MaxBlockGageChanged(const FOnAttributeChangeData& Data);
 	virtual void BlockGageRegenRateChanged(const FOnAttributeChangeData& Data);

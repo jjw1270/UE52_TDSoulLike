@@ -20,14 +20,13 @@ void UTDSLAttributeSetBase::PreAttributeChange(const FGameplayAttribute& Attribu
 	{
 		AdjustAttributeForMaxChange(Health, MaxHealth, NewValue, GetHealthAttribute());
 	}
+	else if (Attribute == GetMaxStaminaAttribute())
+	{
+		AdjustAttributeForMaxChange(Stamina, MaxStamina, NewValue, GetStaminaAttribute());
+	}
 	else if (Attribute == GetMaxBlockGageAttribute())
 	{
 		AdjustAttributeForMaxChange(BlockGage, MaxBlockGage, NewValue, GetBlockGageAttribute());
-	}
-	else if (Attribute == GetMoveSpeedAttribute())
-	{
-		// Cannot slow less than 100 units/s and cannot boost more than 600 units/s
-		NewValue = FMath::Clamp<float>(NewValue, 100, 600);
 	}
 }
 
@@ -36,17 +35,22 @@ void UTDSLAttributeSetBase::PostGameplayEffectExecute(const FGameplayEffectModCa
 	Super::PostGameplayEffectExecute(Data);
 
 	// TODO -- Add some logic after Gameplay Effect executed
-		if (Data.EvaluatedData.Attribute == GetHealthAttribute())
-		{
-			// Handle other health changes.
-			// Health loss should go through Damage.
-			SetHealth(FMath::Clamp(GetHealth(), 0.0f, GetMaxHealth()));
-		} // Health
-		else if (Data.EvaluatedData.Attribute == GetBlockGageAttribute())
-		{
-			// Handle BlockGage changes.
-			SetBlockGage(FMath::Clamp(GetBlockGage(), 0.0f, GetMaxBlockGage()));
-		} // BlockGage
+	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
+	{
+		// Handle other health changes.
+		// Health loss should go through Damage.
+		SetHealth(FMath::Clamp(GetHealth(), 0.0f, GetMaxHealth()));
+	}
+	else if (Data.EvaluatedData.Attribute == GetStaminaAttribute())
+	{
+		// Handle stamina changes.
+		SetStamina(FMath::Clamp(GetStamina(), 0.0f, GetMaxStamina()));
+	}
+	else if (Data.EvaluatedData.Attribute == GetBlockGageAttribute())
+	{
+		// Handle BlockGage changes.
+		SetBlockGage(FMath::Clamp(GetBlockGage(), 0.0f, GetMaxBlockGage()));
+	}
 }
 
 void UTDSLAttributeSetBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -56,10 +60,12 @@ void UTDSLAttributeSetBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	DOREPLIFETIME_CONDITION_NOTIFY(UTDSLAttributeSetBase, Health, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UTDSLAttributeSetBase, MaxHealth, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UTDSLAttributeSetBase, HealthRegenRate, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UTDSLAttributeSetBase, Stamina, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UTDSLAttributeSetBase, MaxStamina, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UTDSLAttributeSetBase, StaminaRegenRate, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UTDSLAttributeSetBase, BlockGage, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UTDSLAttributeSetBase, MaxBlockGage, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UTDSLAttributeSetBase, BlockGageRegenRate, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UTDSLAttributeSetBase, MoveSpeed, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UTDSLAttributeSetBase, Gold, COND_None, REPNOTIFY_Always);
 
 }
@@ -95,6 +101,21 @@ void UTDSLAttributeSetBase::OnRep_HealthRegenRate(const FGameplayAttributeData& 
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UTDSLAttributeSetBase, HealthRegenRate, OldValue);
 }
 
+void UTDSLAttributeSetBase::OnRep_Stamina(const FGameplayAttributeData& OldValue)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UTDSLAttributeSetBase, Stamina, OldValue);
+}
+
+void UTDSLAttributeSetBase::OnRep_MaxStamina(const FGameplayAttributeData& OldValue)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UTDSLAttributeSetBase, MaxStamina, OldValue);
+}
+
+void UTDSLAttributeSetBase::OnRep_StaminaRegenRate(const FGameplayAttributeData& OldValue)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UTDSLAttributeSetBase, StaminaRegenRate, OldValue);
+}
+
 void UTDSLAttributeSetBase::OnRep_BlockGage(const FGameplayAttributeData& OldValue)
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UTDSLAttributeSetBase, BlockGage, OldValue);
@@ -110,9 +131,9 @@ void UTDSLAttributeSetBase::OnRep_BlockGageRegenRate(const FGameplayAttributeDat
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UTDSLAttributeSetBase, BlockGageRegenRate, OldValue);
 }
 
-void UTDSLAttributeSetBase::OnRep_MoveSpeed(const FGameplayAttributeData& OldValue)
+void UTDSLAttributeSetBase::OnRep_MoveSpeed(const FGameplayAttributeData& OldMoveSpeed)
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UTDSLAttributeSetBase, MoveSpeed, OldValue);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UTDSLAttributeSetBase, MoveSpeed, OldMoveSpeed);
 }
 
 void UTDSLAttributeSetBase::OnRep_Gold(const FGameplayAttributeData& OldValue)

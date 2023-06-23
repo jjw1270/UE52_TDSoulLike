@@ -73,6 +73,12 @@ void ATDSLPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 		EnhancedInputComponent->BindAction(SwitchPostureAction, ETriggerEvent::Started, this, &ATDSLPlayerCharacter::OnSwitchPostureStarted);
 		EnhancedInputComponent->BindAction(SwitchPostureAction, ETriggerEvent::Completed, this, &ATDSLPlayerCharacter::OnSwitchPostureReleased);
 
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ATDSLPlayerCharacter::OnSprintStarted);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ATDSLPlayerCharacter::OnSprintReleased);
+
+		EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Started, this, &ATDSLPlayerCharacter::OnBlockStarted);
+		EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Completed, this, &ATDSLPlayerCharacter::OnBlockReleased);
+
 		// Bind player input to the AbilitySystemComponent. Also called in OnRep_PlayerState because of a potential race condition.
 		BindASCInput();
 	}
@@ -120,6 +126,34 @@ void ATDSLPlayerCharacter::PossessedBy(AController* NewController)
 		{
 			PC->CreateHUD();
 		}
+	}
+}
+
+float ATDSLPlayerCharacter::GetStamina() const
+{
+	if (AttributeSetBase.IsValid())
+	{
+		return AttributeSetBase->GetStamina();
+	}
+
+	return 0.0f;
+}
+
+float ATDSLPlayerCharacter::GetMaxStamina() const
+{
+	if (AttributeSetBase.IsValid())
+	{
+		return AttributeSetBase->GetMaxStamina();
+	}
+
+	return 0.0f;
+}
+
+void ATDSLPlayerCharacter::SetStamina(float Stamina)
+{
+	if (AttributeSetBase.IsValid())
+	{
+		AttributeSetBase->SetStamina(Stamina);
 	}
 }
 
@@ -251,6 +285,7 @@ void ATDSLPlayerCharacter::OnRep_PlayerState()
 
 		// Set Health/Mana/Stamina to their max. This is only necessary for *Respawn*.
 		SetHealth(GetMaxHealth());
+		SetStamina(GetMaxStamina());
 		SetBlockGage(GetMaxBlockGage());
 	}
 }
@@ -292,6 +327,26 @@ void ATDSLPlayerCharacter::OnSwitchPostureReleased()
 	SendAbilityLocalInput(false, static_cast<int32>(ETDSLAbilityInputID::SwitchPose));
 }
 
+void ATDSLPlayerCharacter::OnSprintStarted()
+{
+	SendAbilityLocalInput(true, static_cast<int32>(ETDSLAbilityInputID::Sprint));
+}
+
+void ATDSLPlayerCharacter::OnSprintReleased()
+{
+	SendAbilityLocalInput(false, static_cast<int32>(ETDSLAbilityInputID::Sprint));
+}
+
+void ATDSLPlayerCharacter::OnBlockStarted()
+{
+	SendAbilityLocalInput(true, static_cast<int32>(ETDSLAbilityInputID::Block));
+}
+
+void ATDSLPlayerCharacter::OnBlockReleased()
+{
+	SendAbilityLocalInput(false, static_cast<int32>(ETDSLAbilityInputID::Block));
+}
+
 void ATDSLPlayerCharacter::SendAbilityLocalInput(bool Value, int32 InputID)
 {
 	if (!AbilitySystemComponent.IsValid())
@@ -300,11 +355,9 @@ void ATDSLPlayerCharacter::SendAbilityLocalInput(bool Value, int32 InputID)
 	if (Value)
 	{
 		AbilitySystemComponent->AbilityLocalInputPressed(InputID);
-		UE_LOG(LogTemp, Warning, TEXT("Trigger"));
 	}
 	else
 	{
 		AbilitySystemComponent->AbilityLocalInputReleased(InputID);
-		UE_LOG(LogTemp, Warning, TEXT("Release"));
 	}
 }

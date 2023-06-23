@@ -14,7 +14,7 @@ class TDSOULLIKE_API UTDSLCharacterMovementComponent : public UCharacterMovement
 {
 	GENERATED_BODY()
 	
-	class FGDSavedMove : public FSavedMove_Character
+	class FTDSLSavedMove : public FSavedMove_Character
 	{
 	public:
 
@@ -42,10 +42,10 @@ class TDSOULLIKE_API UTDSLCharacterMovementComponent : public UCharacterMovement
 		uint8 SavedRequestToStartBattlePosture : 1;
 	};
 
-	class FGDNetworkPredictionData_Client : public FNetworkPredictionData_Client_Character
+	class FTDSLNetworkPredictionData_Client : public FNetworkPredictionData_Client_Character
 	{
 	public:
-		FGDNetworkPredictionData_Client(const UCharacterMovementComponent& ClientMovement);
+		FTDSLNetworkPredictionData_Client(const UCharacterMovementComponent& ClientMovement);
 
 		typedef FNetworkPredictionData_Client_Character Super;
 

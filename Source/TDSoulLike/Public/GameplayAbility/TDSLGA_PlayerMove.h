@@ -6,7 +6,6 @@
 #include "GameplayAbility/TDSLGameplayAbility.h"
 #include "TDSLGA_PlayerMove.generated.h"
 
-
 UCLASS()
 class TDSOULLIKE_API UTDSLGA_PlayerMove : public UTDSLGameplayAbility
 {

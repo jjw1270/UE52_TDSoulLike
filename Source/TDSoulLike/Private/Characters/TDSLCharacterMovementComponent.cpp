@@ -26,19 +26,26 @@ float UTDSLCharacterMovementComponent::GetMaxSpeed() const
 		return 0.0f;
 	}
 
-	if (Owner->GetAbilitySystemComponent()->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("State.Debuff.Stun"))))
+	if (Owner->GetAbilitySystemComponent()->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("Ability.Block"))))
 	{
 		return 0.0f;
+	}
+
+	if (RequestToStartBattlePosture)
+	{
+		if (RequestToStartSprinting)
+		{
+			return Owner->GetMoveSpeed() * BattlePostureSpeedMultiplier * SprintSpeedMultiplier;
+		}
+		else
+		{
+			return Owner->GetMoveSpeed() * BattlePostureSpeedMultiplier;
+		}
 	}
 
 	if (RequestToStartSprinting)
 	{
 		return Owner->GetMoveSpeed() * SprintSpeedMultiplier;
-	}
-
-	if (RequestToStartBattlePosture)
-	{
-		return Owner->GetMoveSpeed() * BattlePostureSpeedMultiplier;
 	}
 
 	return Owner->GetMoveSpeed();
@@ -64,7 +71,7 @@ FNetworkPredictionData_Client* UTDSLCharacterMovementComponent::GetPredictionDat
 	{
 		UTDSLCharacterMovementComponent* MutableThis = const_cast<UTDSLCharacterMovementComponent*>(this);
 
-		MutableThis->ClientPredictionData = new FGDNetworkPredictionData_Client(*this);
+		MutableThis->ClientPredictionData = new FTDSLNetworkPredictionData_Client(*this);
 		MutableThis->ClientPredictionData->MaxSmoothNetUpdateDist = 92.f;
 		MutableThis->ClientPredictionData->NoSmoothNetUpdateDist = 140.f;
 	}
@@ -92,7 +99,7 @@ void UTDSLCharacterMovementComponent::StopBattlePosture()
 	RequestToStartBattlePosture = false;
 }
 
-void UTDSLCharacterMovementComponent::FGDSavedMove::Clear()
+void UTDSLCharacterMovementComponent::FTDSLSavedMove::Clear()
 {
 	Super::Clear();
 
@@ -100,7 +107,7 @@ void UTDSLCharacterMovementComponent::FGDSavedMove::Clear()
 	SavedRequestToStartBattlePosture = false;
 }
 
-uint8 UTDSLCharacterMovementComponent::FGDSavedMove::GetCompressedFlags() const
+uint8 UTDSLCharacterMovementComponent::FTDSLSavedMove::GetCompressedFlags() const
 {
 	uint8 Result = Super::GetCompressedFlags();
 
@@ -117,15 +124,15 @@ uint8 UTDSLCharacterMovementComponent::FGDSavedMove::GetCompressedFlags() const
 	return Result;
 }
 
-bool UTDSLCharacterMovementComponent::FGDSavedMove::CanCombineWith(const FSavedMovePtr& NewMove, ACharacter* Character, float MaxDelta) const
+bool UTDSLCharacterMovementComponent::FTDSLSavedMove::CanCombineWith(const FSavedMovePtr& NewMove, ACharacter* Character, float MaxDelta) const
 {
 	//Set which moves can be combined together. This will depend on the bit flags that are used.
-	if (SavedRequestToStartSprinting != ((FGDSavedMove*)&NewMove)->SavedRequestToStartSprinting)
+	if (SavedRequestToStartSprinting != ((FTDSLSavedMove*)&NewMove)->SavedRequestToStartSprinting)
 	{
 		return false;
 	}
 
-	if (SavedRequestToStartBattlePosture != ((FGDSavedMove*)&NewMove)->SavedRequestToStartBattlePosture)
+	if (SavedRequestToStartBattlePosture != ((FTDSLSavedMove*)&NewMove)->SavedRequestToStartBattlePosture)
 	{
 		return false;
 	}
@@ -133,7 +140,7 @@ bool UTDSLCharacterMovementComponent::FGDSavedMove::CanCombineWith(const FSavedM
 	return Super::CanCombineWith(NewMove, Character, MaxDelta);
 }
 
-void UTDSLCharacterMovementComponent::FGDSavedMove::SetMoveFor(ACharacter* Character, float InDeltaTime, FVector const& NewAccel, FNetworkPredictionData_Client_Character& ClientData)
+void UTDSLCharacterMovementComponent::FTDSLSavedMove::SetMoveFor(ACharacter* Character, float InDeltaTime, FVector const& NewAccel, FNetworkPredictionData_Client_Character& ClientData)
 {
 	Super::SetMoveFor(Character, InDeltaTime, NewAccel, ClientData);
 
@@ -145,7 +152,7 @@ void UTDSLCharacterMovementComponent::FGDSavedMove::SetMoveFor(ACharacter* Chara
 	}
 }
 
-void UTDSLCharacterMovementComponent::FGDSavedMove::PrepMoveFor(ACharacter* Character)
+void UTDSLCharacterMovementComponent::FTDSLSavedMove::PrepMoveFor(ACharacter* Character)
 {
 	Super::PrepMoveFor(Character);
 
@@ -155,12 +162,12 @@ void UTDSLCharacterMovementComponent::FGDSavedMove::PrepMoveFor(ACharacter* Char
 	}
 }
 
-UTDSLCharacterMovementComponent::FGDNetworkPredictionData_Client::FGDNetworkPredictionData_Client(const UCharacterMovementComponent& ClientMovement)
+UTDSLCharacterMovementComponent::FTDSLNetworkPredictionData_Client::FTDSLNetworkPredictionData_Client(const UCharacterMovementComponent& ClientMovement)
 	: Super(ClientMovement)
 {
 }
 
-FSavedMovePtr UTDSLCharacterMovementComponent::FGDNetworkPredictionData_Client::AllocateNewMove()
+FSavedMovePtr UTDSLCharacterMovementComponent::FTDSLNetworkPredictionData_Client::AllocateNewMove()
 {
-	return FSavedMovePtr(new FGDSavedMove());
+	return FSavedMovePtr(new FTDSLSavedMove());
 }

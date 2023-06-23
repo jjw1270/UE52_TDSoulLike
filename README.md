@@ -10,8 +10,8 @@
 - Dash             	: Space
 - Default Atk     	: A
 - Smash Atk      	: S
-- Special Skill	    : D
-- Block		        : F
+- Special Skill	    : W
+- Block		        : D
 - Interaction	    : E
 - Change Posture	: Q
-- LockDown Target   : W
+- LockDown Target   : F

@@ -47,10 +47,14 @@ void ATDSLPlayerController::CreateHUD()
 	UIHUDWidget->SetCurrentHealth(PS->GetHealth());
 	UIHUDWidget->SetMaxHealth(PS->GetMaxHealth());
 	UIHUDWidget->SetHealthPercentage(PS->GetHealth() / FMath::Max<float>(PS->GetMaxHealth(), 1.f));
+	UIHUDWidget->SetHealthRegenRate(PS->GetHealthRegenRate());
+	UIHUDWidget->SetCurrentStamina(PS->GetStamina());
+	UIHUDWidget->SetMaxStamina(PS->GetMaxStamina());
+	UIHUDWidget->SetStaminaPercentage(PS->GetStamina() / FMath::Max<float>(PS->GetMaxStamina(), 1.f));
+	UIHUDWidget->SetStaminaRegenRate(PS->GetStaminaRegenRate());
 	UIHUDWidget->SetCurrentBlockGage(PS->GetBlockGage());
 	UIHUDWidget->SetMaxBlockGage(PS->GetMaxBlockGage());
 	UIHUDWidget->SetBlockGagePercentage(PS->GetBlockGage() / FMath::Max<float>(PS->GetMaxBlockGage(), 1.f));
-	UIHUDWidget->SetHealthRegenRate(PS->GetHealthRegenRate());
 	UIHUDWidget->SetBlockGageRegenRate(PS->GetBlockGageRegenRate());
 	UIHUDWidget->SetGold(PS->GetGold());
 

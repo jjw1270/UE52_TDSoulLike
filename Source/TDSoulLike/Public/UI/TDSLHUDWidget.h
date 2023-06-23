@@ -33,6 +33,18 @@ public:
 	void SetHealthRegenRate(float HealthRegenRate);
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void SetMaxStamina(float MaxStamina);
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void SetCurrentStamina(float CurrentStamina);
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void SetStaminaPercentage(float StaminaPercentage);
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void SetStaminaRegenRate(float StaminaRegenRate);
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void SetMaxBlockGage(float MaxBlockGage);
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)

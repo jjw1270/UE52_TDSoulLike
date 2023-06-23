@@ -55,7 +55,22 @@ public:
 	FGameplayAttributeData HealthRegenRate;
 	ATTRIBUTE_ACCESSORS(UTDSLAttributeSetBase, HealthRegenRate)
 
-	// BlockGage is used to execute block ability. Capped by MaxBlockGage
+	// Current stamina, used to execute special abilities. Capped by MaxStamina.
+	UPROPERTY(BlueprintReadOnly, Category = "Stamina", ReplicatedUsing = OnRep_Stamina)
+	FGameplayAttributeData Stamina;
+	ATTRIBUTE_ACCESSORS(UTDSLAttributeSetBase, Stamina)
+
+	// MaxStamina is its own attribute since GameplayEffects may modify it
+	UPROPERTY(BlueprintReadOnly, Category = "Stamina", ReplicatedUsing = OnRep_MaxStamina)
+	FGameplayAttributeData MaxStamina;
+	ATTRIBUTE_ACCESSORS(UTDSLAttributeSetBase, MaxStamina)
+
+	// Stamina regen rate will passively increase Stamina every second
+	UPROPERTY(BlueprintReadOnly, Category = "Stamina", ReplicatedUsing = OnRep_StaminaRegenRate)
+	FGameplayAttributeData StaminaRegenRate;
+	ATTRIBUTE_ACCESSORS(UTDSLAttributeSetBase, StaminaRegenRate)
+
+	// BlockGage is used to execute block ability for block enemy's atk. Capped by MaxBlockGage
 	UPROPERTY(BlueprintReadOnly, Category = "BlockGage", ReplicatedUsing = OnRep_BlockGage)
 	FGameplayAttributeData BlockGage;
 	ATTRIBUTE_ACCESSORS(UTDSLAttributeSetBase, BlockGage)
@@ -102,6 +117,15 @@ protected:
 	virtual void OnRep_HealthRegenRate(const FGameplayAttributeData& OldValue);
 
 	UFUNCTION()
+	virtual void OnRep_Stamina(const FGameplayAttributeData& OldValue);
+
+	UFUNCTION()
+	virtual void OnRep_MaxStamina(const FGameplayAttributeData& OldValue);
+
+	UFUNCTION()
+	virtual void OnRep_StaminaRegenRate(const FGameplayAttributeData& OldValue);
+
+	UFUNCTION()
 	virtual void OnRep_BlockGage(const FGameplayAttributeData& OldValue);
 
 	UFUNCTION()
@@ -111,10 +135,9 @@ protected:
 	virtual void OnRep_BlockGageRegenRate(const FGameplayAttributeData& OldValue);
 
 	UFUNCTION()
-	virtual void OnRep_MoveSpeed(const FGameplayAttributeData& OldValue);
+	virtual void OnRep_MoveSpeed(const FGameplayAttributeData& OldMoveSpeed);
 
 	UFUNCTION()
 	virtual void OnRep_Gold(const FGameplayAttributeData& OldValue);
-
 
 };

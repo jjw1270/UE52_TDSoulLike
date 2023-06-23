@@ -44,12 +44,20 @@ public:
 	virtual void FinishDying() override;
 
 	UFUNCTION(BlueprintCallable, Category = "GAS|Chararcter|Attributes")
+	float GetStamina() const;
+
+	UFUNCTION(BlueprintCallable, Category = "GAS|Chararcter|Attributes")
+	float GetMaxStamina() const;
+
+	UFUNCTION(BlueprintCallable, Category = "GAS|Chararcter|Attributes")
 	float GetBlockGage() const;
 
 	UFUNCTION(BlueprintCallable, Category = "GAS|Chararcter|Attributes")
 	float GetMaxBlockGage() const;
 
 protected:
+	virtual void SetStamina(float Stamina);
+
 	virtual void SetBlockGage(float BlockGage);
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = Camera)
@@ -91,6 +99,14 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> SwitchPostureAction;
 
+	/** SwitchPosture Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> SprintAction;
+
+	/** SwitchPosture Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> BlockAction;
+
 	/** Dash Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> DashAction;
@@ -101,6 +117,12 @@ protected:
 
 	void OnSwitchPostureStarted();
 	void OnSwitchPostureReleased();
+
+	void OnSprintStarted();
+	void OnSprintReleased();
+
+	void OnBlockStarted();
+	void OnBlockReleased();
 
 	virtual void SendAbilityLocalInput(bool Value, int32 InputID);
 
