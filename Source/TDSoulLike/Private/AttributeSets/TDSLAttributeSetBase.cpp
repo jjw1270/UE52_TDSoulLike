@@ -4,6 +4,8 @@
 #include "AttributeSets/TDSLAttributeSetBase.h"
 #include "GameplayEffectExtension.h"
 #include "Net/UnrealNetwork.h"
+#include "Characters/TDSLCharacterBase.h"
+#include "Characters/TDSLPlayerCharacter.h"
 
 UTDSLAttributeSetBase::UTDSLAttributeSetBase()
 {
@@ -28,14 +30,140 @@ void UTDSLAttributeSetBase::PreAttributeChange(const FGameplayAttribute& Attribu
 	{
 		AdjustAttributeForMaxChange(BlockGage, MaxBlockGage, NewValue, GetBlockGageAttribute());
 	}
+	else if (Attribute == GetMoveSpeedAttribute())
+	{
+		// Cannot slow less than 150 units/s and cannot boost more than 1000 units/s
+		NewValue = FMath::Clamp<float>(NewValue, 150, 1000);
+	}
 }
 
 void UTDSLAttributeSetBase::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
 {
 	Super::PostGameplayEffectExecute(Data);
 
+	FGameplayEffectContextHandle Context = Data.EffectSpec.GetContext();
+	UAbilitySystemComponent* Source = Context.GetOriginalInstigatorAbilitySystemComponent();
+	const FGameplayTagContainer& SourceTags = *Data.EffectSpec.CapturedSourceTags.GetAggregatedTags();
+	FGameplayTagContainer SpecAssetTags;
+	Data.EffectSpec.GetAllAssetTags(SpecAssetTags);
+
+	// Get the Target actor, which should be our owner
+	AActor* TargetActor = nullptr;
+	AController* TargetController = nullptr;
+	ATDSLCharacterBase* TargetCharacter = nullptr;
+	if (Data.Target.AbilityActorInfo.IsValid() && Data.Target.AbilityActorInfo->AvatarActor.IsValid())
+	{
+		TargetActor = Data.Target.AbilityActorInfo->AvatarActor.Get();
+		TargetController = Data.Target.AbilityActorInfo->PlayerController.Get();
+		TargetCharacter = Cast<ATDSLCharacterBase>(TargetActor);
+	}
+
+	// Get the Source actor
+	AActor* SourceActor = nullptr;
+	AController* SourceController = nullptr;
+	ATDSLCharacterBase* SourceCharacter = nullptr;
+	if (Source && Source->AbilityActorInfo.IsValid() && Source->AbilityActorInfo->AvatarActor.IsValid())
+	{
+		SourceActor = Source->AbilityActorInfo->AvatarActor.Get();
+		SourceController = Source->AbilityActorInfo->PlayerController.Get();
+		if (SourceController == nullptr && SourceActor != nullptr)
+		{
+			if (APawn* Pawn = Cast<APawn>(SourceActor))
+			{
+				SourceController = Pawn->GetController();
+			}
+		}
+
+		// Use the controller to find the source pawn
+		if (SourceController)
+		{
+			SourceCharacter = Cast<ATDSLCharacterBase>(SourceController->GetPawn());
+		}
+		else
+		{
+			SourceCharacter = Cast<ATDSLCharacterBase>(SourceActor);
+		}
+
+		// Set the causer actor based on context if it's set
+		if (Context.GetEffectCauser())
+		{
+			SourceActor = Context.GetEffectCauser();
+		}
+	}
+
 	// TODO -- Add some logic after Gameplay Effect executed
-	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
+
+
+
+	if (Data.EvaluatedData.Attribute == GetDamageAttribute())
+	{
+		// Store a local copy of the amount of damage done and clear the damage attribute
+		const float LocalDamageDone = GetDamage();
+		SetDamage(0.f);
+
+		if (LocalDamageDone > 0.0f)
+		{
+			// If character was alive before damage is added, handle damage
+			// This prevents damage being added to dead things and replaying death animations
+			bool WasAlive = true;
+
+			if (TargetCharacter)
+			{
+				WasAlive = TargetCharacter->IsAlive();
+			}
+
+			if (!TargetCharacter->IsAlive())
+			{
+				//UE_LOG(LogTemp, Warning, TEXT("%s() %s is NOT alive when receiving damage"), TEXT(__FUNCTION__), *TargetCharacter->GetName());
+			}
+
+			// Apply the health change and then clamp it
+			const float NewHealth = GetHealth() - LocalDamageDone;
+			SetHealth(FMath::Clamp(NewHealth, 0.0f, GetMaxHealth()));
+
+			if (TargetCharacter && WasAlive)
+			{
+				// This is the log statement for damage received. Turned off for live games.
+				UE_LOG(LogTemp, Log, TEXT("%s Damage Received: %f"), *TargetCharacter->GetName(), LocalDamageDone);
+
+				// Play HitReact animation and sound with a multicast RPC.
+				// TargetCharacter->PlayHitReact(HitDirectionFrontTag, SourceCharacter);
+
+				/* Show damage number for the Source player unless it was self damage
+				if (SourceActor != TargetActor)
+				{
+					ATDSLPlayerController* PC = Cast<ATDSLPlayerController>(SourceController);
+					if (PC)
+					{
+						PC->ShowDamageNumber(LocalDamageDone, TargetCharacter);
+					}
+				}*/
+
+				//if (!TargetCharacter->IsAlive())
+				//{
+				//	// TargetCharacter was alive before this damage and now is not alive, give Gold bounties to Source.
+				//	// Don't give bounty to self.
+				//	if (SourceController != TargetController)
+				//	{
+				//		// Create a dynamic instant Gameplay Effect to give the bounties
+				//		UGameplayEffect* GEBounty = NewObject<UGameplayEffect>(GetTransientPackage(), FName(TEXT("Bounty")));
+				//		GEBounty->DurationPolicy = EGameplayEffectDurationType::Instant;
+
+				//		int32 Idx = GEBounty->Modifiers.Num();
+				//		GEBounty->Modifiers.SetNum(Idx + 2);
+
+				//		FGameplayModifierInfo& InfoGold = GEBounty->Modifiers[Idx + 1];
+				//		InfoGold.ModifierMagnitude = FScalableFloat(GetGoldBounty());
+				//		InfoGold.ModifierOp = EGameplayModOp::Additive;
+				//		InfoGold.Attribute = UTDSLAttributeSetBase::GetGoldAttribute();
+
+				//		Source->ApplyGameplayEffectToSelf(GEBounty, 1.0f, Source->MakeEffectContext());
+				//	}
+				//}
+			}
+		}
+	}
+	else if (Data.EvaluatedData.Attribute == GetHealthAttribute())
 	{
 		// Handle other health changes.
 		// Health loss should go through Damage.
