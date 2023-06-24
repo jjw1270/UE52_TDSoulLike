@@ -340,11 +340,13 @@ void ATDSLPlayerCharacter::OnSprintReleased()
 void ATDSLPlayerCharacter::OnBlockStarted()
 {
 	SendAbilityLocalInput(true, static_cast<int32>(ETDSLAbilityInputID::Block));
+	UE_LOG(LogTemp, Warning, TEXT("Block"));
 }
 
 void ATDSLPlayerCharacter::OnBlockReleased()
 {
 	SendAbilityLocalInput(false, static_cast<int32>(ETDSLAbilityInputID::Block));
+	UE_LOG(LogTemp, Warning, TEXT("Block End"));
 }
 
 void ATDSLPlayerCharacter::SendAbilityLocalInput(bool Value, int32 InputID)

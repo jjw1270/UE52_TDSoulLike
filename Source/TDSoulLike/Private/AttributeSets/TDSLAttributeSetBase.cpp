@@ -93,8 +93,6 @@ void UTDSLAttributeSetBase::PostGameplayEffectExecute(const FGameplayEffectModCa
 
 	// TODO -- Add some logic after Gameplay Effect executed
 
-
-
 	if (Data.EvaluatedData.Attribute == GetDamageAttribute())
 	{
 		// Store a local copy of the amount of damage done and clear the damage attribute
@@ -116,6 +114,14 @@ void UTDSLAttributeSetBase::PostGameplayEffectExecute(const FGameplayEffectModCa
 			{
 				//UE_LOG(LogTemp, Warning, TEXT("%s() %s is NOT alive when receiving damage"), TEXT(__FUNCTION__), *TargetCharacter->GetName());
 			}
+
+			const FGameplayTag BlockTag = FGameplayTag::RequestGameplayTag(FName("Ability.Block"), false);
+			bool IsBlocking = Data.EffectSpec.CapturedSourceTags.GetSpecTags().HasTagExact(BlockTag);
+			if (IsBlocking)
+			{
+				UE_LOG(LogTemp, Log, TEXT("Blocking"));
+			}
+
 
 			// Apply the health change and then clamp it
 			const float NewHealth = GetHealth() - LocalDamageDone;

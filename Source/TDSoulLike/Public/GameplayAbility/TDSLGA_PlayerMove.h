@@ -23,6 +23,8 @@ public:
 	virtual void CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancelAbility) override;
 
 private:
+	//FGameplayTag BlockTag;
+
 	UPROPERTY()
 	class ACharacter* PlayerCharacter;
 
@@ -43,6 +45,9 @@ private:
 
 	UPROPERTY()
 	class UTDSLAT_WaitPlayerStop* ATWaitPlayerStop;
+
+	//UPROPERTY()
+	//class UAbilityTask_WaitGameplayTagAdded* ATWaitTag;
 
 	UFUNCTION()
 	void OnMovementStop();

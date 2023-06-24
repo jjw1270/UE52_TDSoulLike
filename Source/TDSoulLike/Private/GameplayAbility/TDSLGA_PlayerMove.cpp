@@ -4,6 +4,7 @@
 #include "GameplayAbility/TDSLGA_PlayerMove.h"
 #include "GameplayAbility/AbilityTask/TDSLAT_OnTick.h"
 #include "GameplayAbility/AbilityTask/TDSLAT_WaitPlayerStop.h"
+//#include "Abilities/Tasks/AbilityTask_WaitGameplayTag.h"
 
 #include "TDSoulLike/TDSoulLike.h"
 #include "TDSLAbilitySystemComponent.h"
@@ -22,6 +23,7 @@ UTDSLGA_PlayerMove::UTDSLGA_PlayerMove()
 	AbilityTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Ability.PlayerMove")));
 	ActivationOwnedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Ability.PlayerMove")));
 
+	// BlockTag = FGameplayTag::RequestGameplayTag(FName("Ability.Block"));
 }
 
 void UTDSLGA_PlayerMove::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
@@ -44,6 +46,11 @@ void UTDSLGA_PlayerMove::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 
 		ATWaitPlayerStop = UTDSLAT_WaitPlayerStop::CreateWaitVelocityChange(this, FName());
 		ATWaitPlayerStop->OnVelocityChage.AddDynamic(this, &UTDSLGA_PlayerMove::OnMovementStop);
+
+		//ATWaitTag = UAbilityTask_WaitGameplayTagAdded::WaitGameplayTagAdd(this, BlockTag);
+		//ATWaitTag->Added.AddDynamic(this, &UTDSLGA_PlayerMove::OnMovementStop);
+		//ATWaitTag->ReadyForActivation();
+
 	}
 }
 
