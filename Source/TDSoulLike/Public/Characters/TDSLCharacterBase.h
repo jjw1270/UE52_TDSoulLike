@@ -9,6 +9,7 @@
 #include "TDSoulLike/TDSoulLike.h"
 #include "TDSLCharacterBase.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCharacterBaseHitReactDelegate, ETDSLHitReactDirection, Direction);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCharacterDiedDelegate, ATDSLCharacterBase*, Character);
 
 // This Class is Abstract and should not be used directly! (Not-Blueprintable)
@@ -21,6 +22,10 @@ public:
 	// Sets default values for this character's properties
 	ATDSLCharacterBase(const class FObjectInitializer& ObjectInitializer);
 
+	// Set the Hit React direction in the Animation Blueprint
+	UPROPERTY(BlueprintAssignable, Category = "GAS|Character")
+	FCharacterBaseHitReactDelegate ShowHitReact;
+
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Character")
 	FCharacterDiedDelegate OnCharacterDied;
 
@@ -31,11 +36,20 @@ public:
 	virtual bool IsAlive() const;
 
 	// Switch on AbilityID to return individual ability levels. Hardcoded to 1 for every ability in this project.
-	UFUNCTION(BlueprintCallable, Category = "GAS|GDCharacter")
+	UFUNCTION(BlueprintCallable, Category = "GAS|TDSLCharacter")
 	virtual int32 GetAbilityLevel(ETDSLAbilityInputID AbilityID) const;
 
 	// Removes all CharacterAbilities. Can only be called by the Server. Removing on the Server will remove from Client too.
 	virtual void RemoveCharacterAbilities();
+
+	UFUNCTION(BlueprintCallable)
+	ETDSLHitReactDirection GetHitReactDirection(const FVector& ImpactPoint);
+
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	virtual void PlayHitReact(FGameplayTag HitDirection, AActor* DamageCauser);
+	virtual void PlayHitReact_Implementation(FGameplayTag HitDirection, AActor* DamageCauser);
+	virtual bool PlayHitReact_Validate(FGameplayTag HitDirection, AActor* DamageCauser);
+
 
 	/**
 	* Getters for attributes from TDSLAttributeSetBase
@@ -73,6 +87,10 @@ protected:
 	TWeakObjectPtr<class UTDSLAbilitySystemComponent> AbilitySystemComponent;
 	TWeakObjectPtr<class UTDSLAttributeSetBase> AttributeSetBase;
 
+	FGameplayTag HitDirectionFrontTag;
+	FGameplayTag HitDirectionBackTag;
+	FGameplayTag HitDirectionRightTag;
+	FGameplayTag HitDirectionLeftTag;
 	FGameplayTag DeadTag;
 	FGameplayTag EffectRemoveOnDeathTag;
 

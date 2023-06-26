@@ -33,4 +33,12 @@ public:
 	// Epic's comment: Projects may want to initiate passives or do other "BeginPlay" type of logic here.
 	virtual void OnAvatarSet(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
 
+	UFUNCTION(BlueprintCallable)
+	void StopActorMovement();
+
+	UFUNCTION(BlueprintCallable)
+	void SetPlayerRotationToUnderCursor(bool SmoothRotation, float RotationSpeed = 0);
+
+private:
+	FTimerHandle TimerHandle_StopRotation;
 };

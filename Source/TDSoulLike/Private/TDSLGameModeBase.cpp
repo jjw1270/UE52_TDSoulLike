@@ -3,3 +3,11 @@
 
 #include "TDSLGameModeBase.h"
 
+ATDSLGameModeBase::ATDSLGameModeBase()
+{
+
+}
+
+void ATDSLGameModeBase::PlayerDied(AController* Controller)
+{
+}

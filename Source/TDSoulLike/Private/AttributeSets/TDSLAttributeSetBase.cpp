@@ -33,7 +33,7 @@ void UTDSLAttributeSetBase::PreAttributeChange(const FGameplayAttribute& Attribu
 	else if (Attribute == GetMoveSpeedAttribute())
 	{
 		// Cannot slow less than 150 units/s and cannot boost more than 1000 units/s
-		NewValue = FMath::Clamp<float>(NewValue, 150, 1000);
+		NewValue = FMath::Clamp<float>(NewValue, 100, 1000);
 	}
 }
 
@@ -115,25 +115,69 @@ void UTDSLAttributeSetBase::PostGameplayEffectExecute(const FGameplayEffectModCa
 				//UE_LOG(LogTemp, Warning, TEXT("%s() %s is NOT alive when receiving damage"), TEXT(__FUNCTION__), *TargetCharacter->GetName());
 			}
 
-			const FGameplayTag BlockTag = FGameplayTag::RequestGameplayTag(FName("Ability.Block"), false);
-			bool IsBlocking = Data.EffectSpec.CapturedSourceTags.GetSpecTags().HasTagExact(BlockTag);
-			if (IsBlocking)
+			const FGameplayTag BlockTag = FGameplayTag::RequestGameplayTag(FName("State.Block"), false);
+			//bool IsBlocking = Data.EffectSpec.CapturedSourceTags.GetSpecTags().HasTagExact(BlockTag);
+
+			if (SourceTags.HasTag(BlockTag))
 			{
-				UE_LOG(LogTemp, Log, TEXT("Blocking"));
+				const FGameplayTag ParryingTag = FGameplayTag::RequestGameplayTag(FName("State.Block.Parrying"), false);
+				if (SourceTags.HasTag(ParryingTag))
+				{
+					// Parrying doesnt take any damage
+					UE_LOG(LogTemp, Log, TEXT("Parrying"));
+				}
+				else
+				{
+					// need fix when block gage is zero
+					UE_LOG(LogTemp, Log, TEXT("Blocking"));
+
+					// Apply the BlokGage/Health change and then clamp it
+					const float NewBlockGage = GetBlockGage() - LocalDamageDone * 0.7;
+					SetBlockGage(FMath::Clamp(NewBlockGage, 0.0f, GetMaxBlockGage()));
+					const float NewHealth = GetHealth() - LocalDamageDone * 0.3;
+					SetHealth(FMath::Clamp(NewHealth, 0.0f, GetMaxHealth()));
+				}
+			}
+			else
+			{
+				// Apply the health change and then clamp it
+				const float NewHealth = GetHealth() - LocalDamageDone;
+				SetHealth(FMath::Clamp(NewHealth, 0.0f, GetMaxHealth()));
 			}
 
-
-			// Apply the health change and then clamp it
-			const float NewHealth = GetHealth() - LocalDamageDone;
-			SetHealth(FMath::Clamp(NewHealth, 0.0f, GetMaxHealth()));
 
 			if (TargetCharacter && WasAlive)
 			{
 				// This is the log statement for damage received. Turned off for live games.
-				UE_LOG(LogTemp, Log, TEXT("%s Damage Received: %f"), *TargetCharacter->GetName(), LocalDamageDone);
+				// UE_LOG(LogTemp, Log, TEXT("%s Damage Received: %f"), *TargetCharacter->GetName(), LocalDamageDone);
 
 				// Play HitReact animation and sound with a multicast RPC.
-				// TargetCharacter->PlayHitReact(HitDirectionFrontTag, SourceCharacter);
+				const FHitResult* Hit = Data.EffectSpec.GetContext().GetHitResult();
+
+				if (Hit)
+				{
+					ETDSLHitReactDirection HitDirection = TargetCharacter->GetHitReactDirection(Data.EffectSpec.GetContext().GetHitResult()->Location);
+					switch (HitDirection)
+					{
+					case ETDSLHitReactDirection::Left:
+						TargetCharacter->PlayHitReact(HitDirectionLeftTag, SourceCharacter);
+						break;
+					case ETDSLHitReactDirection::Front:
+						TargetCharacter->PlayHitReact(HitDirectionFrontTag, SourceCharacter);
+						break;
+					case ETDSLHitReactDirection::Right:
+						TargetCharacter->PlayHitReact(HitDirectionRightTag, SourceCharacter);
+						break;
+					case ETDSLHitReactDirection::Back:
+						TargetCharacter->PlayHitReact(HitDirectionBackTag, SourceCharacter);
+						break;
+					}
+				}
+				else
+				{
+					// No hit result. Default to front.
+					TargetCharacter->PlayHitReact(HitDirectionFrontTag, SourceCharacter);
+				}
 
 				/* Show damage number for the Source player unless it was self damage
 				if (SourceActor != TargetActor)

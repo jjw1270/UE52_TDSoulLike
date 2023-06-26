@@ -14,4 +14,9 @@ class TDSOULLIKE_API ATDSLGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 	
+public:
+	ATDSLGameModeBase();
+
+	void PlayerDied(AController* Controller);
+	
 };

@@ -140,4 +140,9 @@ protected:
 	UFUNCTION()
 	virtual void OnRep_Gold(const FGameplayAttributeData& OldValue);
 
+private:
+	FGameplayTag HitDirectionFrontTag;
+	FGameplayTag HitDirectionBackTag;
+	FGameplayTag HitDirectionRightTag;
+	FGameplayTag HitDirectionLeftTag;
 };

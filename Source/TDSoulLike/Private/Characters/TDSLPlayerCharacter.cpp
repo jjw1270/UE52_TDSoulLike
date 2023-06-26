@@ -3,6 +3,7 @@
 
 #include "Characters/TDSLPlayerCharacter.h"
 #include "Player/TDSLPlayerController.h"
+#include "TDSLGameModeBase.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -202,17 +203,17 @@ void ATDSLPlayerCharacter::AttachWeapon(const bool bIsAttachToHand)
 
 void ATDSLPlayerCharacter::FinishDying()
 {
-	//if (GetLocalRole() == ROLE_Authority)
-	//{
-	//	AGASDocumentationGameMode* GM = Cast<AGASDocumentationGameMode>(GetWorld()->GetAuthGameMode());
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		ATDSLGameModeBase* GM = Cast<ATDSLGameModeBase>(GetWorld()->GetAuthGameMode());
 
-	//	if (GM)
-	//	{
-	//		GM->HeroDied(GetController());
-	//	}
-	//}
+		if (GM)
+		{
+			GM->PlayerDied(GetController());
+		}
+	}
 
-	//Super::FinishDying();
+	Super::FinishDying();
 }
 
 /**

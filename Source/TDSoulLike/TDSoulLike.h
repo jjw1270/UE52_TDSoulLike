@@ -4,6 +4,21 @@
 
 #include "CoreMinimal.h"
 
+UENUM(BlueprintType)
+enum class ETDSLHitReactDirection : uint8
+{
+	// 0
+	None			UMETA(DisplayName = "None"),
+	// 1
+	Left 			UMETA(DisplayName = "Left"),
+	// 2
+	Front 			UMETA(DisplayName = "Front"),
+	// 3
+	Right			UMETA(DisplayName = "Right"),
+	// 4
+	Back			UMETA(DisplayName = "Back")
+};
+
 // TDSLAbilityInputID provide the ability to bind GA's to input bindings in Editor.
 // These bindings will be provided as an Enum on the "TDSLGameplayAbility" class and can be
 // bound in editor under Project Settings->Engine->Input->Action Mappings. For passive Abilities

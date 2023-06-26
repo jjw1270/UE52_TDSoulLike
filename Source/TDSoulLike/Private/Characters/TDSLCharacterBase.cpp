@@ -65,6 +65,73 @@ void ATDSLCharacterBase::RemoveCharacterAbilities()
 	AbilitySystemComponent->bCharacterAbilitiesGiven = false;
 }
 
+ETDSLHitReactDirection ATDSLCharacterBase::GetHitReactDirection(const FVector& ImpactPoint)
+{
+	const FVector& ActorLocation = GetActorLocation();
+	// PointPlaneDist is super cheap - 1 vector subtraction, 1 dot product.
+	float DistanceToFrontBackPlane = FVector::PointPlaneDist(ImpactPoint, ActorLocation, GetActorRightVector());
+	float DistanceToRightLeftPlane = FVector::PointPlaneDist(ImpactPoint, ActorLocation, GetActorForwardVector());
+
+
+	//if (FMath::Abs(DistanceToFrontBackPlane) <= FMath::Abs(DistanceToRightLeftPlane))
+	//{
+		// Determine if Front or Back
+
+		// Can see if it's left or right of Left/Right plane which would determine Front or Back
+	//	if (DistanceToRightLeftPlane >= 0)
+	//	{
+	//		return ETDSLHitReactDirection::Front;
+	//	}
+	//	else
+	//	{
+	//		return ETDSLHitReactDirection::Back;
+	//	}
+	//}
+	//else
+	//{
+	//	// Determine if Right or Left
+
+	//	if (DistanceToFrontBackPlane >= 0)
+	//	{
+	//		return ETDSLHitReactDirection::Right;
+	//	}
+	//	else
+	//	{
+	//		return ETDSLHitReactDirection::Left;
+	//	}
+	//}
+
+	return ETDSLHitReactDirection::Front;
+}
+
+void ATDSLCharacterBase::PlayHitReact_Implementation(FGameplayTag HitDirection, AActor* DamageCauser)
+{
+	if (IsAlive())
+	{
+		if (HitDirection == HitDirectionLeftTag)
+		{
+			ShowHitReact.Broadcast(ETDSLHitReactDirection::Left);
+		}
+		else if (HitDirection == HitDirectionFrontTag)
+		{
+			ShowHitReact.Broadcast(ETDSLHitReactDirection::Front);
+		}
+		else if (HitDirection == HitDirectionRightTag)
+		{
+			ShowHitReact.Broadcast(ETDSLHitReactDirection::Right);
+		}
+		else if (HitDirection == HitDirectionBackTag)
+		{
+			ShowHitReact.Broadcast(ETDSLHitReactDirection::Back);
+		}
+	}
+}
+
+bool ATDSLCharacterBase::PlayHitReact_Validate(FGameplayTag HitDirection, AActor* DamageCauser)
+{
+	return true;
+}
+
 float ATDSLCharacterBase::GetHealth() const
 {
 	if (AttributeSetBase.IsValid())

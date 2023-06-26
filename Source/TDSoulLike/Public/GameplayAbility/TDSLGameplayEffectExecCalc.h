@@ -15,8 +15,8 @@ class TDSOULLIKE_API UTDSLGameplayEffectExecCalc : public UGameplayEffectExecuti
 	GENERATED_BODY()
 	
 public:
-	//UTDSLGameplayEffectExecCalc();
+	UTDSLGameplayEffectExecCalc();
 
-	//virtual void Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams, OUT FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const override;
+	virtual void Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams, OUT FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const override;
 
 };
