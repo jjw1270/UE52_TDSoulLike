@@ -109,7 +109,7 @@ private:
 
 	/** Dash Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputAction> DashAction;
+	TObjectPtr<UInputAction> RollAction;
 
 protected:
 	void OnSetDestinationStarted();
@@ -123,6 +123,9 @@ protected:
 
 	void OnBlockStarted();
 	void OnBlockReleased();
+
+	void OnRollStarted();
+	void OnRollReleased();
 
 	virtual void SendAbilityLocalInput(bool Value, int32 InputID);
 

@@ -79,6 +79,9 @@ void ATDSLPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 		EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Started, this, &ATDSLPlayerCharacter::OnBlockStarted);
 		EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Completed, this, &ATDSLPlayerCharacter::OnBlockReleased);
 
+		EnhancedInputComponent->BindAction(RollAction, ETriggerEvent::Started, this, &ATDSLPlayerCharacter::OnRollStarted);
+		EnhancedInputComponent->BindAction(RollAction, ETriggerEvent::Completed, this, &ATDSLPlayerCharacter::OnRollReleased);
+
 		// Bind player input to the AbilitySystemComponent. Also called in OnRep_PlayerState because of a potential race condition.
 		BindASCInput();
 	}
@@ -347,6 +350,18 @@ void ATDSLPlayerCharacter::OnBlockReleased()
 {
 	SendAbilityLocalInput(false, static_cast<int32>(ETDSLAbilityInputID::Block));
 	UE_LOG(LogTemp, Warning, TEXT("Block End"));
+}
+
+void ATDSLPlayerCharacter::OnRollStarted()
+{
+	SendAbilityLocalInput(true, static_cast<int32>(ETDSLAbilityInputID::Roll));
+	UE_LOG(LogTemp, Warning, TEXT("Roll"));
+}
+
+void ATDSLPlayerCharacter::OnRollReleased()
+{
+	SendAbilityLocalInput(false, static_cast<int32>(ETDSLAbilityInputID::Roll));
+	UE_LOG(LogTemp, Warning, TEXT("Roll End"));
 }
 
 void ATDSLPlayerCharacter::SendAbilityLocalInput(bool Value, int32 InputID)

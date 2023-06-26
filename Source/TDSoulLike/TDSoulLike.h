@@ -36,5 +36,5 @@ enum class ETDSLAbilityInputID : uint8
 
 	Block				UMETA(DisplayName = "Block"),
 
-	Dash				UMETA(DisplayName = "Dash"),
+	Roll				UMETA(DisplayName = "Roll"),
 };
