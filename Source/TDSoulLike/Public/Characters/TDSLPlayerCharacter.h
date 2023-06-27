@@ -33,6 +33,8 @@ public:
 
 	FORCEINLINE USkeletalMeshComponent* GetWeaponComponent() const { return WeaponComponent; }
 
+	FORCEINLINE class UBoxComponent* GetWeaponCollision() const { return WeaponCollision; }
+
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	FName WeaponBackSocketName;
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
@@ -68,6 +70,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 	USkeletalMeshComponent* WeaponComponent;
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+	class UBoxComponent* WeaponCollision;
 
 	bool ASCInputBound = false;
 
@@ -107,9 +112,17 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> BlockAction;
 
-	/** Dash Action */
+	/** Roll Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> RollAction;
+
+	/** Standard Atk Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> StandardAtkAction;
+
+	/** Power Atk Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> PowerAtkAction;
 
 protected:
 	void OnSetDestinationStarted();
@@ -126,6 +139,12 @@ protected:
 
 	void OnRollStarted();
 	void OnRollReleased();
+
+	void OnStandardAtkStarted();
+	void OnStandardAtkReleased();
+
+	void OnPowerAtkStarted();
+	void OnPowerAtkReleased();
 
 	virtual void SendAbilityLocalInput(bool Value, int32 InputID);
 

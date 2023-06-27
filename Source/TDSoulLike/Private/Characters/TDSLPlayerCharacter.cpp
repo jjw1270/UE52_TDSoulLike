@@ -9,6 +9,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/BoxComponent.h"
 
 #include "AI/TDSLPlayerAIController.h"
 
@@ -46,6 +47,11 @@ ATDSLPlayerCharacter::ATDSLPlayerCharacter(const class FObjectInitializer& Objec
 	FollowCamera->FieldOfView = 55.0f;
 
 	WeaponComponent = CreateDefaultSubobject<USkeletalMeshComponent>(FName("Weapon"));
+	WeaponCollision = CreateDefaultSubobject<UBoxComponent>(FName("WeaponCollision"));
+	WeaponCollision->SetupAttachment(WeaponComponent);
+	WeaponCollision->SetRelativeLocation(FVector(0, 0, -50.f));
+	WeaponCollision->InitBoxExtent(FVector(5.f, 5.f, 70.f));
+	WeaponCollision->SetGenerateOverlapEvents(false);
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 
@@ -82,6 +88,12 @@ void ATDSLPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 		EnhancedInputComponent->BindAction(RollAction, ETriggerEvent::Started, this, &ATDSLPlayerCharacter::OnRollStarted);
 		EnhancedInputComponent->BindAction(RollAction, ETriggerEvent::Completed, this, &ATDSLPlayerCharacter::OnRollReleased);
+
+		EnhancedInputComponent->BindAction(StandardAtkAction, ETriggerEvent::Started, this, &ATDSLPlayerCharacter::OnStandardAtkStarted);
+		EnhancedInputComponent->BindAction(StandardAtkAction, ETriggerEvent::Completed, this, &ATDSLPlayerCharacter::OnStandardAtkReleased);
+
+		EnhancedInputComponent->BindAction(PowerAtkAction, ETriggerEvent::Started, this, &ATDSLPlayerCharacter::OnPowerAtkStarted);
+		EnhancedInputComponent->BindAction(PowerAtkAction, ETriggerEvent::Completed, this, &ATDSLPlayerCharacter::OnPowerAtkReleased);
 
 		// Bind player input to the AbilitySystemComponent. Also called in OnRep_PlayerState because of a potential race condition.
 		BindASCInput();
@@ -344,25 +356,41 @@ void ATDSLPlayerCharacter::OnSprintReleased()
 void ATDSLPlayerCharacter::OnBlockStarted()
 {
 	SendAbilityLocalInput(true, static_cast<int32>(ETDSLAbilityInputID::Block));
-	UE_LOG(LogTemp, Warning, TEXT("Block"));
 }
 
 void ATDSLPlayerCharacter::OnBlockReleased()
 {
 	SendAbilityLocalInput(false, static_cast<int32>(ETDSLAbilityInputID::Block));
-	UE_LOG(LogTemp, Warning, TEXT("Block End"));
 }
 
 void ATDSLPlayerCharacter::OnRollStarted()
 {
 	SendAbilityLocalInput(true, static_cast<int32>(ETDSLAbilityInputID::Roll));
-	UE_LOG(LogTemp, Warning, TEXT("Roll"));
 }
 
 void ATDSLPlayerCharacter::OnRollReleased()
 {
 	SendAbilityLocalInput(false, static_cast<int32>(ETDSLAbilityInputID::Roll));
-	UE_LOG(LogTemp, Warning, TEXT("Roll End"));
+}
+
+void ATDSLPlayerCharacter::OnStandardAtkStarted()
+{
+	SendAbilityLocalInput(true, static_cast<int32>(ETDSLAbilityInputID::StandardAtk));
+}
+
+void ATDSLPlayerCharacter::OnStandardAtkReleased()
+{
+	SendAbilityLocalInput(false, static_cast<int32>(ETDSLAbilityInputID::StandardAtk));
+}
+
+void ATDSLPlayerCharacter::OnPowerAtkStarted()
+{
+	SendAbilityLocalInput(true, static_cast<int32>(ETDSLAbilityInputID::PowerAtk));
+}
+
+void ATDSLPlayerCharacter::OnPowerAtkReleased()
+{
+	SendAbilityLocalInput(false, static_cast<int32>(ETDSLAbilityInputID::PowerAtk));
 }
 
 void ATDSLPlayerCharacter::SendAbilityLocalInput(bool Value, int32 InputID)

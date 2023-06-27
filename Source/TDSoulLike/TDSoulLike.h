@@ -33,13 +33,13 @@ enum class ETDSLAbilityInputID : uint8
 
 	Cancel				UMETA(DisplayName = "Cancel"),
 
+	StandardAtk			UMETA(DisplayName = "StandardAtk"),
+
+	PowerAtk			UMETA(DisplayName = "PowerAtk"),
+
+	SpecialAtk			UMETA(DisplayName = "SpecialAtk"),
+
 	Ability1			UMETA(DisplayName = "Ability1"),
-
-	Ability2			UMETA(DisplayName = "Ability2"),
-
-	Ability3			UMETA(DisplayName = "Ability3"),
-
-	Ability4			UMETA(DisplayName = "Ability4"),
 
 	SwitchPose			UMETA(DisplayName = "SwitchPose"),
 
