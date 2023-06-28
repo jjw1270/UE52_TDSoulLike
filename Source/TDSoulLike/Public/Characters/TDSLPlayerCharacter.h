@@ -33,8 +33,6 @@ public:
 
 	FORCEINLINE USkeletalMeshComponent* GetWeaponComponent() const { return WeaponComponent; }
 
-	FORCEINLINE class UBoxComponent* GetWeaponCollision() const { return WeaponCollision; }
-
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	FName WeaponBackSocketName;
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
@@ -70,9 +68,6 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 	USkeletalMeshComponent* WeaponComponent;
-
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
-	class UBoxComponent* WeaponCollision;
 
 	bool ASCInputBound = false;
 

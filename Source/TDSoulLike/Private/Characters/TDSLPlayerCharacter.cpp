@@ -47,11 +47,6 @@ ATDSLPlayerCharacter::ATDSLPlayerCharacter(const class FObjectInitializer& Objec
 	FollowCamera->FieldOfView = 55.0f;
 
 	WeaponComponent = CreateDefaultSubobject<USkeletalMeshComponent>(FName("Weapon"));
-	WeaponCollision = CreateDefaultSubobject<UBoxComponent>(FName("WeaponCollision"));
-	WeaponCollision->SetupAttachment(WeaponComponent);
-	WeaponCollision->SetRelativeLocation(FVector(0, 0, -50.f));
-	WeaponCollision->InitBoxExtent(FVector(5.f, 5.f, 70.f));
-	WeaponCollision->SetGenerateOverlapEvents(false);
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 
