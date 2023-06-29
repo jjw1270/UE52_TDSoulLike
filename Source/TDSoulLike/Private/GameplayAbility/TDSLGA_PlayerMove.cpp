@@ -108,6 +108,5 @@ void UTDSLGA_PlayerMove::Move(float DeltaTime)
 
 void UTDSLGA_PlayerMove::OnMovementStop()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Stop"));
 	CancelAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true);
 }

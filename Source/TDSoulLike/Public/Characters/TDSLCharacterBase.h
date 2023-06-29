@@ -49,11 +49,12 @@ public:
 	virtual void PlayHitReact(FGameplayTag HitDirection, AActor* DamageCauser);
 	virtual void PlayHitReact_Implementation(FGameplayTag HitDirection, AActor* DamageCauser);
 	virtual bool PlayHitReact_Validate(FGameplayTag HitDirection, AActor* DamageCauser);
-
-
+	
 	/**
 	* Getters for attributes from TDSLAttributeSetBase
 	**/
+
+	FORCEINLINE FText GetCharacterName() { return CharacterName; }
 
 	UFUNCTION(BlueprintCallable, Category = "GAS|Chararcter|Attributes")
 	float GetHealth() const;

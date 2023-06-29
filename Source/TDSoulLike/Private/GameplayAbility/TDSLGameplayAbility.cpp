@@ -36,13 +36,13 @@ void UTDSLGameplayAbility::StopActorMovement()
 	}
 }
 
-void UTDSLGameplayAbility::SetPlayerRotationToUnderCursor(bool SmoothRotation, float RotationSpeed)
+FRotator UTDSLGameplayAbility::SetPlayerRotationToUnderCursor(bool SmoothRotation, float RotationSpeed)
 {
 	ATDSLPlayerCharacter* PlayerCharacter = Cast<ATDSLPlayerCharacter>(GetAvatarActorFromActorInfo());
 	ATDSLPlayerController* PlayerController = Cast<ATDSLPlayerController>(PlayerCharacter->GetController());
 	if (!PlayerCharacter || !PlayerController)
 	{
-		return;
+		return FRotator::ZeroRotator;
 	}
 
 	FHitResult Hit;
@@ -71,7 +71,7 @@ void UTDSLGameplayAbility::SetPlayerRotationToUnderCursor(bool SmoothRotation, f
 		if (World == nullptr)
 		{
 			UE_LOG(LogTemp, Error, TEXT("GA World"));
-			return;
+			return FRotator::ZeroRotator;
 		}
 
 		//Set Timer to Smooth Rotation
@@ -102,4 +102,6 @@ void UTDSLGameplayAbility::SetPlayerRotationToUnderCursor(bool SmoothRotation, f
 			true
 		);
 	}
+
+	return WorldRotation;
 }

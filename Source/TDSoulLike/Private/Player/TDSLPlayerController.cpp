@@ -5,12 +5,13 @@
 #include "TDSLAbilitySystemComponent.h"
 #include "Player/TDSLPlayerState.h"
 #include "UI/TDSLHUDWidget.h"
+#include "UI/TDSLEnemyInfoWidget.h"
+#include "Characters/TDSLCharacterBase.h"
 
 ATDSLPlayerController::ATDSLPlayerController()
 {
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Default;
-
 }
 
 void ATDSLPlayerController::CreateHUD()
@@ -63,6 +64,59 @@ void ATDSLPlayerController::CreateHUD()
 UTDSLHUDWidget* ATDSLPlayerController::GetHUD()
 {
 	return UIHUDWidget;
+}
+
+void ATDSLPlayerController::ShowEnemyInfoHUD(ATDSLCharacterBase* TargetCharacter)
+{
+	if (!UIEnemyInfoWidgetClass)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s() Missing UIEnemyInfoWidgetClass. Please fill in on the Blueprint of the PlayerController."), *FString(__FUNCTION__));
+		return;
+	}
+
+	// Only create once
+	if (!UIEnemyInfoWidget)
+	{
+		UIEnemyInfoWidget = CreateWidget<UTDSLEnemyInfoWidget>(this, UIEnemyInfoWidgetClass);
+	}
+
+	// Only create a HUD for local player
+	if (!IsLocalPlayerController())
+	{
+		return;
+	}
+
+	if (!UIEnemyInfoWidget->IsInViewport()) 
+	{
+		UIEnemyInfoWidget->AddToViewport();
+	}
+
+	if (TimerHandle_HideEnemyInfoHUD.IsValid())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(TimerHandle_HideEnemyInfoHUD);
+	}
+
+	UIEnemyInfoWidget->SetCharacterName(TargetCharacter->GetCharacterName());
+	float HealthPercent = TargetCharacter->GetHealth() / TargetCharacter->GetMaxHealth();
+	UIEnemyInfoWidget->SetHealthPercentage(HealthPercent);
+
+	if (HealthPercent <= 0)
+	{
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle_HideEnemyInfoHUD, this, &ATDSLPlayerController::HideEnemyInfoHUD, 1.f, false, 1.f);
+	}
+}
+
+void ATDSLPlayerController::HideEnemyInfoHUD()
+{
+	if (UIEnemyInfoWidget->IsInViewport())
+	{
+		UIEnemyInfoWidget->RemoveFromViewport();
+	}
+}
+
+UTDSLEnemyInfoWidget* ATDSLPlayerController::GetEnemyHUD()
+{
+	return UIEnemyInfoWidget;
 }
 
 // Server only

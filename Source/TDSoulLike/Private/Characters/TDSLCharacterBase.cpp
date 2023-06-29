@@ -9,6 +9,8 @@
 #include "GameplayAbility/TDSLGameplayAbility.h"
 #include "AttributeSets/TDSLAttributeSetBase.h"
 
+#include "Player/TDSLPlayerController.h"
+
 // Sets default values
 ATDSLCharacterBase::ATDSLCharacterBase(const class FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UTDSLCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))

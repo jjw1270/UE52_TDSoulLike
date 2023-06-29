@@ -5,12 +5,21 @@
 #include "Characters/TDSLPlayerCharacter.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "Player/TDSLPlayerController.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(TDSLANS_Attack)
 
 UTDSLANS_Attack::UTDSLANS_Attack(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+#if WITH_EDITORONLY_DATA
+	bShouldFireInEditor = false;
+#endif // WITH_EDITORONLY_DATA
+
+	PowerAtkTag = FGameplayTag::RequestGameplayTag(FName("Ability.Attack.Power"));
+	AtkStackTag = FGameplayTag::RequestGameplayTag(FName("State.AtkStack"));
+	DamageTag = FGameplayTag::RequestGameplayTag(FName("Damage.SetByCaller"));
 }
 
 void UTDSLANS_Attack::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration, const FAnimNotifyEventReference& EventReference)
@@ -26,10 +35,6 @@ void UTDSLANS_Attack::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenc
 	{
 		SourceWeaponMesh = PC->GetWeaponComponent();
 	}
-
-	PowerAtkTag = FGameplayTag::RequestGameplayTag(FName("Ability.Attack.Power"));
-	AtkStackTag = FGameplayTag::RequestGameplayTag(FName("State.AtkStack"));
-	DamageTag = FGameplayTag::RequestGameplayTag(FName("Damage.SetByCaller"));
 
 	AtkStackCount = SourceCharacter->GetAbilitySystemComponent()->GetGameplayTagCount(AtkStackTag);
 }
@@ -93,17 +98,32 @@ void UTDSLANS_Attack::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequence
 
 void UTDSLANS_Attack::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
-
+	AlreadyDamagedTargets.Empty();
 }
 
 void UTDSLANS_Attack::ApplyDamageToTarget()
 {
-	FVector TraceStartPos = SourceWeaponMesh->GetSocketLocation(CollisionAttachSocket1);
-	FVector TraceEndPos = SourceWeaponMesh->GetSocketLocation(CollisionAttachSocket2);
+	FVector TraceStartPos;
+	FVector TraceEndPos;
+	if (bIsSword)
+	{
+		TraceStartPos = SourceWeaponMesh->GetSocketLocation(CollisionAttachSocket1);
+		TraceEndPos = SourceWeaponMesh->GetSocketLocation(CollisionAttachSocket2);
+	}
+	else
+	{
+		TraceStartPos = SourceCharacter->GetMesh()->GetSocketLocation(CollisionAttachSocket1);
+		TraceEndPos = SourceCharacter->GetMesh()->GetSocketLocation(CollisionAttachSocket2);
+	}
 
 	TArray<FHitResult> OutResults;
 	FCollisionShape MySphere = FCollisionShape::MakeSphere(CollisionSphereRadius);
-	if (GetWorld()->SweepMultiByObjectType(OutResults, TraceStartPos, TraceEndPos, FQuat::Identity, ObjTypes.GetValue(), MySphere))
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.Add(SourceCharacter);
+	bool IsHit = UKismetSystemLibrary::SphereTraceMultiForObjects(SourceCharacter->GetWorld(), TraceStartPos, TraceEndPos, CollisionSphereRadius,
+		ObjTypes, false, ActorsToIgnore, EDrawDebugTrace::ForDuration, OutResults, true, FColor::Red, FColor::Green, 1.f);
+
+	if (IsHit)
 	{
 		bool bIsExist = false;
 		ATDSLCharacterBase* TargetCharacter;
@@ -119,17 +139,18 @@ void UTDSLANS_Attack::ApplyDamageToTarget()
 		{
 			AlreadyDamagedTargets.Add(TargetCharacter);
 			// apply damage to target
-			UE_LOG(LogTemp, Warning, TEXT("Hit : %s"), *TargetCharacter->GetName());
-
 			UAbilitySystemComponent* TargetASC = TargetCharacter->GetAbilitySystemComponent();
 			if (TargetCharacter->IsAlive() && TargetASC)
 			{
-				FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(
-					TargetASC->MakeOutgoingSpec(DamageEffect, 1, TargetASC->MakeEffectContext()),
-					DamageTag,
-					Damage * DamageCoefficient
-				);
+				FGameplayEffectSpecHandle GESpecHandle = TargetASC->MakeOutgoingSpec(DamageEffect, 1, TargetASC->MakeEffectContext());
+				GESpecHandle = UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(GESpecHandle, DamageTag, Damage * DamageCoefficient);
 				TargetASC->BP_ApplyGameplayEffectSpecToSelf(GESpecHandle);
+
+				ATDSLPlayerController* PCController = Cast<ATDSLPlayerController>(SourceCharacter->GetController());
+				if (PCController)
+				{
+					PCController->ShowEnemyInfoHUD(TargetCharacter);
+				}
 			}
 		}
 	}

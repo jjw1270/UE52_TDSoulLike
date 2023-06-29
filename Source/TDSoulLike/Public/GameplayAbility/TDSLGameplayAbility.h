@@ -37,7 +37,7 @@ public:
 	void StopActorMovement();
 
 	UFUNCTION(BlueprintCallable)
-	void SetPlayerRotationToUnderCursor(bool SmoothRotation, float RotationSpeed = 0);
+	FRotator SetPlayerRotationToUnderCursor(bool SmoothRotation, float RotationSpeed = 0);
 
 private:
 	FTimerHandle TimerHandle_StopRotation;

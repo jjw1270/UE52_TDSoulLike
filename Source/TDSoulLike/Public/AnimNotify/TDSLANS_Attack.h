@@ -31,6 +31,9 @@ private:
 	float DamageCoefficient;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	bool bIsSword;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	FName CollisionAttachSocket1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
@@ -40,7 +43,7 @@ private:
 	float CollisionSphereRadius;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	TEnumAsByte<EObjectTypeQuery> ObjTypes;
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjTypes;
 
 private:
 	class ATDSLCharacterBase* SourceCharacter;
