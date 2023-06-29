@@ -111,6 +111,7 @@ void ATDSLPlayerController::HideEnemyInfoHUD()
 	if (UIEnemyInfoWidget->IsInViewport())
 	{
 		UIEnemyInfoWidget->RemoveFromViewport();
+		GetWorld()->GetTimerManager().ClearTimer(TimerHandle_HideEnemyInfoHUD);
 	}
 }
 
