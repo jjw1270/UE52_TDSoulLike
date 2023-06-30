@@ -4,12 +4,16 @@
 #include "Characters/TDSLCharacterBase.h"
 #include "Components/CapsuleComponent.h"
 #include "Characters/TDSLCharacterMovementComponent.h"
+#include "UI/TDSLFloatingHpBarWidget.h"
+#include "Components/WidgetComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 #include "TDSLAbilitySystemComponent.h"
 #include "GameplayAbility/TDSLGameplayAbility.h"
 #include "AttributeSets/TDSLAttributeSetBase.h"
 
 #include "Player/TDSLPlayerController.h"
+
 
 // Sets default values
 ATDSLCharacterBase::ATDSLCharacterBase(const class FObjectInitializer& ObjectInitializer)
@@ -19,7 +23,14 @@ ATDSLCharacterBase::ATDSLCharacterBase(const class FObjectInitializer& ObjectIni
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
-	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Overlap);
+	//GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Overlap);
+
+	UIFloatingHPBarComponent = CreateDefaultSubobject<UWidgetComponent>(FName("UIFloatingHPBarComponent"));
+	UIFloatingHPBarComponent->SetWidgetSpace(EWidgetSpace::World);
+	UIFloatingHPBarComponent->SetupAttachment(RootComponent);
+	UIFloatingHPBarComponent->SetRelativeLocation(FVector(0, 0, -GetCapsuleComponent()->GetScaledCapsuleHalfHeight()));
+	UIFloatingHPBarComponent->SetRelativeRotation(FRotator(90.f, 0, 0));
+	UIFloatingHPBarComponent->SetWidgetSpace(EWidgetSpace::Screen);
 
 	bAlwaysRelevant = true;
 
@@ -214,6 +225,48 @@ void ATDSLCharacterBase::FinishDying()
 void ATDSLCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Setup FloatingHPBar UI for Locally Owned Players only, not AI or the server's copy of the PlayerControllers
+	float HPBarDrawSize = GetCapsuleComponent()->GetScaledCapsuleRadius() * FloatingHPBarMultiSize;
+	UIFloatingHPBarComponent->SetDrawSize(FVector2D(HPBarDrawSize));
+
+	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (PC && PC != GetController())
+	{
+		if (UIFloatingHPBarClass)
+		{
+			UIFloatingHPBar = CreateWidget<UTDSLFloatingHpBarWidget>(PC, UIFloatingHPBarClass);
+			if (UIFloatingHPBar && UIFloatingHPBarComponent)
+			{
+				UIFloatingHPBarComponent->SetWidget(UIFloatingHPBar);
+				UE_LOG(LogTemp, Warning, TEXT("adf"));
+
+				// Setup the floating HP bar
+				UIFloatingHPBar->SetHealthPercentage(GetHealth() / GetMaxHealth());
+			}
+		}
+	}
+
+	// Attribute change callbacks
+	HealthChangedDelegateHandle = AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AttributeSetBase->GetHealthAttribute()).AddUObject(this, &ATDSLCharacterBase::HealthChanged);
+
+}
+
+void ATDSLCharacterBase::HealthChanged(const FOnAttributeChangeData& Data)
+{
+	float Health = Data.NewValue;
+
+	// Update floating status bar
+	if (UIFloatingHPBar)
+	{
+		UIFloatingHPBar->SetHealthPercentage(Health / GetMaxHealth());
+	}
+
+	// If the enemy died, handle death
+	if (!IsAlive() && !AbilitySystemComponent->HasMatchingGameplayTag(DeadTag))
+	{
+		Die();
+	}
 }
 
 void ATDSLCharacterBase::AddCharacterAbilities()

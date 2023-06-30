@@ -4,13 +4,12 @@
 #include "GameplayAbility/TDSLGA_PlayerMove.h"
 #include "GameplayAbility/AbilityTask/TDSLAT_OnTick.h"
 #include "GameplayAbility/AbilityTask/TDSLAT_WaitPlayerStop.h"
-//#include "Abilities/Tasks/AbilityTask_WaitGameplayTag.h"
 
 #include "TDSoulLike/TDSoulLike.h"
 #include "TDSLAbilitySystemComponent.h"
 
-#include "GameFramework/Character.h"
-#include "GameFramework/PlayerController.h"
+#include "Characters/TDSLCharacterBase.h"
+#include "Player/TDSLPlayerController.h"
 
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 
@@ -22,8 +21,6 @@ UTDSLGA_PlayerMove::UTDSLGA_PlayerMove()
 	AbilityInputID = ETDSLAbilityInputID::Move;
 	AbilityTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Ability.PlayerMove")));
 	ActivationOwnedTags.AddTag(FGameplayTag::RequestGameplayTag(FName("Ability.PlayerMove")));
-
-	// BlockTag = FGameplayTag::RequestGameplayTag(FName("Ability.Block"));
 }
 
 void UTDSLGA_PlayerMove::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
@@ -38,7 +35,7 @@ void UTDSLGA_PlayerMove::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 		}
 
 		PlayerCharacter = CastChecked<ACharacter>(ActorInfo->AvatarActor.Get());
-		PlayerController = CastChecked<APlayerController>(ActorInfo->PlayerController);
+		PlayerController = CastChecked<ATDSLPlayerController>(ActorInfo->PlayerController);
 
 		ATOnTick = UTDSLAT_OnTick::AbilityTaskOnTick(this, FName());
 		ATOnTick->OnTick.AddDynamic(this, &UTDSLGA_PlayerMove::Move);
@@ -69,8 +66,15 @@ void UTDSLGA_PlayerMove::InputReleased(const FGameplayAbilitySpecHandle Handle, 
 	if (ActorInfo != NULL && ActorInfo->AvatarActor != NULL)
 	{
 		ATOnTick->EndTask();
-		UAIBlueprintHelperLibrary::SimpleMoveToLocation(PlayerController, CachedDestination);
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, FXCursor, CachedDestination, FRotator::ZeroRotator, FVector(1.f, 1.f, 1.f), true, true, ENCPoolMethod::None, true);
+		if (TargetActor)
+		{
+			UAIBlueprintHelperLibrary::SimpleMoveToActor(PlayerController, TargetActor);
+		}
+		else
+		{
+			UAIBlueprintHelperLibrary::SimpleMoveToLocation(PlayerController, CachedDestination);
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, FXCursor, CachedDestination, FRotator::ZeroRotator, FVector(1.f, 1.f, 1.f), true, true, ENCPoolMethod::None, true);
+		}
 
 		ATWaitPlayerStop->ReadyForActivation();
 	}
@@ -92,10 +96,10 @@ void UTDSLGA_PlayerMove::Move(float DeltaTime)
 	// We look for the location in the world where the player has pressed the input
 	FHitResult Hit;
 	bool bHitSuccessful = PlayerController->GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, true, Hit);
-
 	// If we hit a surface, cache the location
 	if (bHitSuccessful)
 	{
+		TargetActor = Cast<ATDSLCharacterBase>(Hit.GetActor());
 		CachedDestination = Hit.Location;
 	}
 
@@ -104,6 +108,13 @@ void UTDSLGA_PlayerMove::Move(float DeltaTime)
 
 	// Move to Target
 	PlayerCharacter->AddMovementInput(WorldDirection, 1.0, false);
+
+	if (TargetActor)
+	{
+		PlayerController->ShowEnemyInfoHUD(TargetActor);
+	}
+	// set target marker ni
+
 }
 
 void UTDSLGA_PlayerMove::OnMovementStop()

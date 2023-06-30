@@ -23,17 +23,17 @@ public:
 	virtual void CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancelAbility) override;
 
 private:
-	//FGameplayTag BlockTag;
-
 	UPROPERTY()
 	class ACharacter* PlayerCharacter;
 
 	UPROPERTY()
-	class APlayerController* PlayerController;
+	class ATDSLPlayerController* PlayerController;
 
 	/** FX Class that we will spawn when clicking */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UNiagaraSystem> FXCursor;
+
+	class ATDSLCharacterBase* TargetActor;
 
 	FVector CachedDestination;
 	

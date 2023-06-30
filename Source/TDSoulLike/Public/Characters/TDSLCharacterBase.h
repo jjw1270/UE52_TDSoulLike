@@ -101,6 +101,24 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "GAS|Animation")
 	UAnimMontage* DeathMontage;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "GAS|UI")
+	TSubclassOf<class UTDSLFloatingHpBarWidget> UIFloatingHPBarClass;
+
+	UPROPERTY()
+	class UTDSLFloatingHpBarWidget* UIFloatingHPBar;
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "GAS|UI")
+	class UWidgetComponent* UIFloatingHPBarComponent;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "GAS|UI")
+	float FloatingHPBarMultiSize{ 2.5f };
+
+
+	FDelegateHandle HealthChangedDelegateHandle;
+
+	// Attribute changed callbacks
+	virtual void HealthChanged(const FOnAttributeChangeData& Data);
+
 	// Default abilities for this Character. These will be removed on Character death and regiven if Character respawns.
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "GAS|Abilities")
 	TArray<TSubclassOf<class UTDSLGameplayAbility>> CharacterAbilities;

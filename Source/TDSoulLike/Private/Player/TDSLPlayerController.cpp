@@ -104,6 +104,10 @@ void ATDSLPlayerController::ShowEnemyInfoHUD(ATDSLCharacterBase* TargetCharacter
 	{
 		GetWorld()->GetTimerManager().SetTimer(TimerHandle_HideEnemyInfoHUD, this, &ATDSLPlayerController::HideEnemyInfoHUD, 1.f, false, 1.f);
 	}
+	else
+	{
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle_HideEnemyInfoHUD, this, &ATDSLPlayerController::HideEnemyInfoHUD, 1.f, false, 5.f);
+	}
 }
 
 void ATDSLPlayerController::HideEnemyInfoHUD()
