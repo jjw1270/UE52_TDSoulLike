@@ -86,8 +86,7 @@ ETDSLHitReactDirection ATDSLCharacterBase::GetHitReactDirection(const FVector& D
 	FRotator WorldRotator = (DamageCauserPos - GetActorLocation()).GetSafeNormal2D().Rotation();
 
 	float Angle = FRotator::NormalizeAxis(WorldRotator.Yaw - ActorRotator.Yaw);
-	UE_LOG(LogTemp, Warning, TEXT("%f"), Angle);
-	// Can see if it's left or right of Left/Right plane which would determine Front or Back
+
 	if (Angle >= -90.f && Angle < 90.f)
 	{
 		return ETDSLHitReactDirection::Front;
