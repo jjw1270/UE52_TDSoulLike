@@ -9,7 +9,9 @@
 
 UTDSLAttributeSetBase::UTDSLAttributeSetBase()
 {
-
+	// Cache tags
+	HitDirectionFrontTag = FGameplayTag::RequestGameplayTag(FName("Effect.HitReact.Front"));
+	HitDirectionBackTag = FGameplayTag::RequestGameplayTag(FName("Effect.HitReact.Back"));
 }
 
 void UTDSLAttributeSetBase::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
@@ -124,12 +126,12 @@ void UTDSLAttributeSetBase::PostGameplayEffectExecute(const FGameplayEffectModCa
 				if (SourceTags.HasTag(ParryingTag))
 				{
 					// Parrying doesnt take any damage
-					UE_LOG(LogTemp, Log, TEXT("Parrying"));
+					UE_LOG(LogTemp, Warning, TEXT("Parrying"));
 				}
 				else
 				{
 					// need fix when block gage is zero
-					UE_LOG(LogTemp, Log, TEXT("Blocking"));
+					UE_LOG(LogTemp, Warning, TEXT("Blocking"));
 
 					// Apply the BlokGage/Health change and then clamp it
 					const float NewBlockGage = GetBlockGage() - LocalDamageDone * 0.7;
@@ -156,21 +158,16 @@ void UTDSLAttributeSetBase::PostGameplayEffectExecute(const FGameplayEffectModCa
 
 				if (Hit)
 				{
-					ETDSLHitReactDirection HitDirection = TargetCharacter->GetHitReactDirection(Data.EffectSpec.GetContext().GetHitResult()->Location);
+					ETDSLHitReactDirection HitDirection = TargetCharacter->GetHitReactDirection(Hit->Location);
+
 					switch (HitDirection)
 					{
-					case ETDSLHitReactDirection::Left:
-						TargetCharacter->PlayHitReact(HitDirectionLeftTag, SourceCharacter);
-						break;
-					case ETDSLHitReactDirection::Front:
-						TargetCharacter->PlayHitReact(HitDirectionFrontTag, SourceCharacter);
-						break;
-					case ETDSLHitReactDirection::Right:
-						TargetCharacter->PlayHitReact(HitDirectionRightTag, SourceCharacter);
-						break;
-					case ETDSLHitReactDirection::Back:
-						TargetCharacter->PlayHitReact(HitDirectionBackTag, SourceCharacter);
-						break;
+						case ETDSLHitReactDirection::Front:
+							TargetCharacter->PlayHitReact(HitDirectionFrontTag, SourceCharacter);
+							break;
+						case ETDSLHitReactDirection::Back:
+							TargetCharacter->PlayHitReact(HitDirectionBackTag, SourceCharacter);
+							break;
 					}
 				}
 				else

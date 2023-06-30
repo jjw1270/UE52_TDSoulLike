@@ -3,6 +3,7 @@
 
 #include "AnimNotify/TDSLANS_Attack.h"
 #include "Characters/TDSLPlayerCharacter.h"
+#include "GameplayAbility/TDSLGameplayAbility.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -121,15 +122,17 @@ void UTDSLANS_Attack::ApplyDamageToTarget()
 	TArray<AActor*> ActorsToIgnore;
 	ActorsToIgnore.Add(SourceCharacter);
 	bool IsHit = UKismetSystemLibrary::SphereTraceMultiForObjects(SourceCharacter->GetWorld(), TraceStartPos, TraceEndPos, CollisionSphereRadius,
-		ObjTypes, false, ActorsToIgnore, EDrawDebugTrace::ForDuration, OutResults, true, FColor::Red, FColor::Green, 1.f);
+		ObjTypes, false, ActorsToIgnore, DrawDebugCollision.GetValue(), OutResults, true, FColor::Red, FColor::Green, 1.f);
 
 	if (IsHit)
 	{
 		bool bIsExist = false;
+		FHitResult OutResult;
 		ATDSLCharacterBase* TargetCharacter;
 		for (const FHitResult& out : OutResults)
 		{
 			TargetCharacter = Cast<ATDSLCharacterBase>(out.GetActor());
+			OutResult = out;
 			if (TargetCharacter && AlreadyDamagedTargets.Contains(TargetCharacter))
 			{
 				bIsExist = true;
@@ -142,9 +145,16 @@ void UTDSLANS_Attack::ApplyDamageToTarget()
 			UAbilitySystemComponent* TargetASC = TargetCharacter->GetAbilitySystemComponent();
 			if (TargetCharacter->IsAlive() && TargetASC)
 			{
-				FGameplayEffectSpecHandle GESpecHandle = TargetASC->MakeOutgoingSpec(DamageEffect, 1, TargetASC->MakeEffectContext());
-				GESpecHandle = UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(GESpecHandle, DamageTag, Damage * DamageCoefficient);
-				TargetASC->BP_ApplyGameplayEffectSpecToSelf(GESpecHandle);
+				FGameplayEffectSpecHandle DamageEffectSpecHandle = TargetASC->MakeOutgoingSpec(DamageEffect, 1, TargetASC->MakeEffectContext());
+
+				// Pass the damage to the Damage Execution Calculation through a SetByCaller value on the GameplayEffectSpec
+				DamageEffectSpecHandle.Data.Get()->SetSetByCallerMagnitude(DamageTag, Damage * DamageCoefficient);
+
+				FHitResult SourceInfo;
+				SourceInfo.Location = SourceCharacter->GetActorLocation();
+				DamageEffectSpecHandle.Data.Get()->GetContext().AddHitResult(SourceInfo);
+
+				TargetASC->ApplyGameplayEffectSpecToSelf(*DamageEffectSpecHandle.Data.Get());
 
 				ATDSLPlayerController* PCController = Cast<ATDSLPlayerController>(SourceCharacter->GetController());
 				if (PCController)

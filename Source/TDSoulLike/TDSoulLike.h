@@ -10,12 +10,8 @@ enum class ETDSLHitReactDirection : uint8
 	// 0
 	None			UMETA(DisplayName = "None"),
 	// 1
-	Left 			UMETA(DisplayName = "Left"),
-	// 2
 	Front 			UMETA(DisplayName = "Front"),
-	// 3
-	Right			UMETA(DisplayName = "Right"),
-	// 4
+	// 2
 	Back			UMETA(DisplayName = "Back")
 };
 

@@ -35,6 +35,8 @@ ATDSLCharacterBase::ATDSLCharacterBase(const class FObjectInitializer& ObjectIni
 	bAlwaysRelevant = true;
 
 	// Cache tags
+	HitDirectionFrontTag = FGameplayTag::RequestGameplayTag(FName("Effect.HitReact.Front"));
+	HitDirectionBackTag = FGameplayTag::RequestGameplayTag(FName("Effect.HitReact.Back"));
 	DeadTag = FGameplayTag::RequestGameplayTag(FName("State.Dead"));
 	EffectRemoveOnDeathTag = FGameplayTag::RequestGameplayTag(FName("Effect.RemoveOnDeath"));
 }
@@ -78,41 +80,22 @@ void ATDSLCharacterBase::RemoveCharacterAbilities()
 	AbilitySystemComponent->bCharacterAbilitiesGiven = false;
 }
 
-ETDSLHitReactDirection ATDSLCharacterBase::GetHitReactDirection(const FVector& ImpactPoint)
+ETDSLHitReactDirection ATDSLCharacterBase::GetHitReactDirection(const FVector& DamageCauserPos)
 {
-	const FVector& ActorLocation = GetActorLocation();
-	// PointPlaneDist is super cheap - 1 vector subtraction, 1 dot product.
-	float DistanceToFrontBackPlane = FVector::PointPlaneDist(ImpactPoint, ActorLocation, GetActorRightVector());
-	float DistanceToRightLeftPlane = FVector::PointPlaneDist(ImpactPoint, ActorLocation, GetActorForwardVector());
+	const FRotator ActorRotator = GetActorForwardVector().Rotation();
+	FRotator WorldRotator = (DamageCauserPos - GetActorLocation()).GetSafeNormal2D().Rotation();
 
-
-	//if (FMath::Abs(DistanceToFrontBackPlane) <= FMath::Abs(DistanceToRightLeftPlane))
-	//{
-		// Determine if Front or Back
-
-		// Can see if it's left or right of Left/Right plane which would determine Front or Back
-	//	if (DistanceToRightLeftPlane >= 0)
-	//	{
-	//		return ETDSLHitReactDirection::Front;
-	//	}
-	//	else
-	//	{
-	//		return ETDSLHitReactDirection::Back;
-	//	}
-	//}
-	//else
-	//{
-	//	// Determine if Right or Left
-
-	//	if (DistanceToFrontBackPlane >= 0)
-	//	{
-	//		return ETDSLHitReactDirection::Right;
-	//	}
-	//	else
-	//	{
-	//		return ETDSLHitReactDirection::Left;
-	//	}
-	//}
+	float Angle = FRotator::NormalizeAxis(WorldRotator.Yaw - ActorRotator.Yaw);
+	UE_LOG(LogTemp, Warning, TEXT("%f"), Angle);
+	// Can see if it's left or right of Left/Right plane which would determine Front or Back
+	if (Angle >= -90.f && Angle < 90.f)
+	{
+		return ETDSLHitReactDirection::Front;
+	}
+	else
+	{
+		return ETDSLHitReactDirection::Back;
+	}
 
 	return ETDSLHitReactDirection::Front;
 }
@@ -121,17 +104,9 @@ void ATDSLCharacterBase::PlayHitReact_Implementation(FGameplayTag HitDirection, 
 {
 	if (IsAlive())
 	{
-		if (HitDirection == HitDirectionLeftTag)
-		{
-			ShowHitReact.Broadcast(ETDSLHitReactDirection::Left);
-		}
-		else if (HitDirection == HitDirectionFrontTag)
+		if (HitDirection == HitDirectionFrontTag)
 		{
 			ShowHitReact.Broadcast(ETDSLHitReactDirection::Front);
-		}
-		else if (HitDirection == HitDirectionRightTag)
-		{
-			ShowHitReact.Broadcast(ETDSLHitReactDirection::Right);
 		}
 		else if (HitDirection == HitDirectionBackTag)
 		{
@@ -239,7 +214,6 @@ void ATDSLCharacterBase::BeginPlay()
 			if (UIFloatingHPBar && UIFloatingHPBarComponent)
 			{
 				UIFloatingHPBarComponent->SetWidget(UIFloatingHPBar);
-				UE_LOG(LogTemp, Warning, TEXT("adf"));
 
 				// Setup the floating HP bar
 				UIFloatingHPBar->SetHealthPercentage(GetHealth() / GetMaxHealth());

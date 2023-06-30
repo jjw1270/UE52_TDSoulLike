@@ -90,8 +90,6 @@ protected:
 
 	FGameplayTag HitDirectionFrontTag;
 	FGameplayTag HitDirectionBackTag;
-	FGameplayTag HitDirectionRightTag;
-	FGameplayTag HitDirectionLeftTag;
 	FGameplayTag DeadTag;
 	FGameplayTag EffectRemoveOnDeathTag;
 

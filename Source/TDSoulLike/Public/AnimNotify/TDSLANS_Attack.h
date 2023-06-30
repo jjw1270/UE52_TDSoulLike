@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
 #include "GameplayTagContainer.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "TDSLANS_Attack.generated.h"
 
 /**
@@ -44,6 +45,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjTypes;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	TEnumAsByte<EDrawDebugTrace::Type> DrawDebugCollision;
 
 private:
 	class ATDSLCharacterBase* SourceCharacter;
