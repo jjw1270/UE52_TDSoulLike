@@ -110,6 +110,12 @@ void ATDSLPlayerController::ShowEnemyInfoHUD(ATDSLCharacterBase* TargetCharacter
 		return;
 	}
 
+	int32 TagCount = PlayerCharacter->GetAbilitySystemComponent()->GetGameplayTagCount(ShowTargetInfoTag);
+	if (TagCount > 0)
+	{
+		PlayerCharacter->GetAbilitySystemComponent()->RemoveLooseGameplayTag(ShowTargetInfoTag, TagCount);
+	}
+
 	PlayerCharacter->GetAbilitySystemComponent()->AddLooseGameplayTag(ShowTargetInfoTag);
 
 	if (!UIEnemyInfoWidget->IsInViewport())
