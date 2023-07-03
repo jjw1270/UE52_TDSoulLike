@@ -43,9 +43,11 @@ enum class ETDSLAbilityInputID : uint8
 
 	Sprint				UMETA(DisplayName = "Sprint"),
 
-	Target				UMETA(DisplayName = "Target"),
+	ShowTargetInfo		UMETA(DisplayName = "ShowTargetInfo"),
 
 	Block				UMETA(DisplayName = "Block"),
 
 	Roll				UMETA(DisplayName = "Roll"),
+
+	LockTarget			UMETA(DisplayName = "LockTarget"),
 };

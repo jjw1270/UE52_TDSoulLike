@@ -119,6 +119,14 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> PowerAtkAction;
 
+	/** Show Target Info Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> ShowTargetInfoAction;
+
+	/** Lock Target Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> LockTargetAction;
+
 protected:
 	void OnSetDestinationStarted();
 	void OnSetDestinationReleased();
@@ -140,6 +148,12 @@ protected:
 
 	void OnPowerAtkStarted();
 	void OnPowerAtkReleased();
+
+	void OnShowTargetInfoStarted();
+	void OnShowTargetInfoReleased();
+
+	void OnLockTargetStarted();
+	void OnLockTargetReleased();
 
 	virtual void SendAbilityLocalInput(bool Value, int32 InputID);
 

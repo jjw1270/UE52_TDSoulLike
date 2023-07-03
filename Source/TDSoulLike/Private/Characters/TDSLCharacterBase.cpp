@@ -29,8 +29,8 @@ ATDSLCharacterBase::ATDSLCharacterBase(const class FObjectInitializer& ObjectIni
 	UIFloatingHPBarComponent->SetWidgetSpace(EWidgetSpace::World);
 	UIFloatingHPBarComponent->SetupAttachment(RootComponent);
 	UIFloatingHPBarComponent->SetRelativeLocation(FVector(0, 0, -GetCapsuleComponent()->GetScaledCapsuleHalfHeight()));
-	UIFloatingHPBarComponent->SetRelativeRotation(FRotator(90.f, 0, 0));
-	UIFloatingHPBarComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	UIFloatingHPBarComponent->SetRelativeRotation(FRotator(90.f, 0.f, 180.f));
+	UIFloatingHPBarComponent->SetUsingAbsoluteRotation(true);
 
 	bAlwaysRelevant = true;
 

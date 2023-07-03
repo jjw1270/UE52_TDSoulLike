@@ -4,15 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "GameplayAbility/TDSLGameplayAbility.h"
-#include "TDSLGA_PlayerMove.generated.h"
+#include "TDSLGA_ShowTargetInfo.generated.h"
 
+/**
+ * 
+ */
 UCLASS()
-class TDSOULLIKE_API UTDSLGA_PlayerMove : public UTDSLGameplayAbility
+class TDSOULLIKE_API UTDSLGA_ShowTargetInfo : public UTDSLGameplayAbility
 {
 	GENERATED_BODY()
-		
+	
 public:
-	UTDSLGA_PlayerMove();
+	UTDSLGA_ShowTargetInfo();
 
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 
@@ -22,31 +25,4 @@ public:
 
 	virtual void CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancelAbility) override;
 
-private:
-	UPROPERTY()
-	class ATDSLCharacterBase* PlayerCharacter;
-
-	UPROPERTY()
-	class ATDSLPlayerController* PlayerController;
-
-	/** FX Class that we will spawn when clicking */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Ability, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UNiagaraSystem> FXCursor;
-
-	UPROPERTY()
-	class ATDSLCharacterBase* TargetActor;
-
-	FVector CachedDestination;
-	
-	UPROPERTY()
-	class UTDSLAT_OnTick* ATOnTick;
-
-	UFUNCTION()
-	void Move(float DeltaTime);
-
-	UPROPERTY()
-	class UTDSLAT_WaitPlayerStop* ATWaitPlayerStop;
-
-	UFUNCTION()
-	void OnMovementStop();
 };

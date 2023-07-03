@@ -12,6 +12,8 @@ ATDSLPlayerController::ATDSLPlayerController()
 {
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Default;
+
+	ShowTargetInfoTag = FGameplayTag::RequestGameplayTag(FName("State.ShowTargetInfo"));
 }
 
 void ATDSLPlayerController::CreateHUD()
@@ -66,18 +68,18 @@ UTDSLHUDWidget* ATDSLPlayerController::GetHUD()
 	return UIHUDWidget;
 }
 
-void ATDSLPlayerController::ShowEnemyInfoHUD(ATDSLCharacterBase* TargetCharacter)
+void ATDSLPlayerController::CreateEnemyInfoUI()
 {
-	if (!UIEnemyInfoWidgetClass)
+	// Only create once
+	if (UIEnemyInfoWidget)
 	{
-		UE_LOG(LogTemp, Error, TEXT("%s() Missing UIEnemyInfoWidgetClass. Please fill in on the Blueprint of the PlayerController."), *FString(__FUNCTION__));
 		return;
 	}
 
-	// Only create once
-	if (!UIEnemyInfoWidget)
+	if (!UIEnemyInfoWidgetClass)
 	{
-		UIEnemyInfoWidget = CreateWidget<UTDSLEnemyInfoWidget>(this, UIEnemyInfoWidgetClass);
+		UE_LOG(LogTemp, Error, TEXT("%s() Missing UIHUDWidgetClass. Please fill in on the Blueprint of the PlayerController."), *FString(__FUNCTION__));
+		return;
 	}
 
 	// Only create a HUD for local player
@@ -86,7 +88,31 @@ void ATDSLPlayerController::ShowEnemyInfoHUD(ATDSLCharacterBase* TargetCharacter
 		return;
 	}
 
-	if (!UIEnemyInfoWidget->IsInViewport()) 
+	// Need a valid PlayerState to get attributes from
+	ATDSLPlayerState* PS = GetPlayerState<ATDSLPlayerState>();
+	if (!PS)
+	{
+		return;
+	}
+
+	UIEnemyInfoWidget = CreateWidget<UTDSLEnemyInfoWidget>(this, UIEnemyInfoWidgetClass);
+}
+
+UTDSLEnemyInfoWidget* ATDSLPlayerController::GetEnemyInfoUI()
+{
+	return UIEnemyInfoWidget;
+}
+
+void ATDSLPlayerController::ShowEnemyInfoHUD(ATDSLCharacterBase* TargetCharacter)
+{
+	if (TargetCharacter == PlayerCharacter)
+	{
+		return;
+	}
+
+	PlayerCharacter->GetAbilitySystemComponent()->AddLooseGameplayTag(ShowTargetInfoTag);
+
+	if (!UIEnemyInfoWidget->IsInViewport())
 	{
 		UIEnemyInfoWidget->AddToViewport();
 	}
@@ -100,13 +126,14 @@ void ATDSLPlayerController::ShowEnemyInfoHUD(ATDSLCharacterBase* TargetCharacter
 	float HealthPercent = TargetCharacter->GetHealth() / TargetCharacter->GetMaxHealth();
 	UIEnemyInfoWidget->SetHealthPercentage(HealthPercent);
 
+
 	if (HealthPercent <= 0)
 	{
 		GetWorld()->GetTimerManager().SetTimer(TimerHandle_HideEnemyInfoHUD, this, &ATDSLPlayerController::HideEnemyInfoHUD, 1.f, false, 1.f);
 	}
 	else
 	{
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle_HideEnemyInfoHUD, this, &ATDSLPlayerController::HideEnemyInfoHUD, 1.f, false, 5.f);
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle_HideEnemyInfoHUD, this, &ATDSLPlayerController::HideEnemyInfoHUD, 1.f, false, 4.f);
 	}
 }
 
@@ -115,13 +142,18 @@ void ATDSLPlayerController::HideEnemyInfoHUD()
 	if (UIEnemyInfoWidget->IsInViewport())
 	{
 		UIEnemyInfoWidget->RemoveFromViewport();
-		GetWorld()->GetTimerManager().ClearTimer(TimerHandle_HideEnemyInfoHUD);
 	}
+
+	PlayerCharacter->GetAbilitySystemComponent()->RemoveLooseGameplayTag(ShowTargetInfoTag);
+
+	GetWorld()->GetTimerManager().ClearTimer(TimerHandle_HideEnemyInfoHUD);
 }
 
-UTDSLEnemyInfoWidget* ATDSLPlayerController::GetEnemyHUD()
+void ATDSLPlayerController::BeginPlay()
 {
-	return UIEnemyInfoWidget;
+	Super::BeginPlay();
+
+	PlayerCharacter = CastChecked<ATDSLCharacterBase>(GetCharacter());
 }
 
 // Server only
@@ -143,4 +175,5 @@ void ATDSLPlayerController::OnRep_PlayerState()
 
 	// For edge cases where the PlayerState is repped before the Player is possessed.
 	CreateHUD();
+	CreateEnemyInfoUI();
 }

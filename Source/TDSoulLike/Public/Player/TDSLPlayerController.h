@@ -20,13 +20,25 @@ public:
 	void CreateHUD();
 	class UTDSLHUDWidget* GetHUD();
 
+	void CreateEnemyInfoUI();
+	class UTDSLEnemyInfoWidget* GetEnemyInfoUI();
+	UFUNCTION(BlueprintCallable)
 	void ShowEnemyInfoHUD(class ATDSLCharacterBase* TargetCharacter);
-	void HideEnemyInfoHUD();
-	class UTDSLEnemyInfoWidget* GetEnemyHUD();
+
 private:
+	FGameplayTag ShowTargetInfoTag;
+
+	UFUNCTION()
+	void HideEnemyInfoHUD();
+
 	FTimerHandle TimerHandle_HideEnemyInfoHUD;
 
 protected:
+	virtual void BeginPlay() override;
+
+	UPROPERTY()
+	class ATDSLCharacterBase* PlayerCharacter;
+
 	/** True if the controlled character should navigate to the mouse cursor. */
 	uint32 bMoveToMouseCursor : 1;
 
@@ -46,4 +58,5 @@ protected:
 	virtual void OnPossess(APawn* InPawn) override;
 
 	virtual void OnRep_PlayerState() override;
+
 };

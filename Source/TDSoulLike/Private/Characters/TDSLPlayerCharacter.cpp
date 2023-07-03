@@ -90,6 +90,12 @@ void ATDSLPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 		EnhancedInputComponent->BindAction(PowerAtkAction, ETriggerEvent::Started, this, &ATDSLPlayerCharacter::OnPowerAtkStarted);
 		EnhancedInputComponent->BindAction(PowerAtkAction, ETriggerEvent::Completed, this, &ATDSLPlayerCharacter::OnPowerAtkReleased);
 
+		EnhancedInputComponent->BindAction(ShowTargetInfoAction, ETriggerEvent::Started, this, &ATDSLPlayerCharacter::OnShowTargetInfoStarted);
+		EnhancedInputComponent->BindAction(ShowTargetInfoAction, ETriggerEvent::Completed, this, &ATDSLPlayerCharacter::OnShowTargetInfoReleased);
+
+		EnhancedInputComponent->BindAction(LockTargetAction, ETriggerEvent::Started, this, &ATDSLPlayerCharacter::OnLockTargetStarted);
+		EnhancedInputComponent->BindAction(LockTargetAction, ETriggerEvent::Completed, this, &ATDSLPlayerCharacter::OnLockTargetReleased);
+
 		// Bind player input to the AbilitySystemComponent. Also called in OnRep_PlayerState because of a potential race condition.
 		BindASCInput();
 	}
@@ -136,6 +142,7 @@ void ATDSLPlayerCharacter::PossessedBy(AController* NewController)
 		if (PC)
 		{
 			PC->CreateHUD();
+			PC->CreateEnemyInfoUI();
 		}
 	}
 }
@@ -286,8 +293,8 @@ void ATDSLPlayerCharacter::OnRep_PlayerState()
 		if (PC)
 		{
 			PC->CreateHUD();
+			PC->CreateEnemyInfoUI();
 		}
-
 
 		// Respawn specific things that won't affect first possession.
 
@@ -386,6 +393,26 @@ void ATDSLPlayerCharacter::OnPowerAtkStarted()
 void ATDSLPlayerCharacter::OnPowerAtkReleased()
 {
 	SendAbilityLocalInput(false, static_cast<int32>(ETDSLAbilityInputID::PowerAtk));
+}
+
+void ATDSLPlayerCharacter::OnShowTargetInfoStarted()
+{
+	SendAbilityLocalInput(true, static_cast<int32>(ETDSLAbilityInputID::ShowTargetInfo));
+}
+
+void ATDSLPlayerCharacter::OnShowTargetInfoReleased()
+{
+	SendAbilityLocalInput(false, static_cast<int32>(ETDSLAbilityInputID::ShowTargetInfo));
+}
+
+void ATDSLPlayerCharacter::OnLockTargetStarted()
+{
+	SendAbilityLocalInput(true, static_cast<int32>(ETDSLAbilityInputID::LockTarget));
+}
+
+void ATDSLPlayerCharacter::OnLockTargetReleased()
+{
+	SendAbilityLocalInput(false, static_cast<int32>(ETDSLAbilityInputID::LockTarget));
 }
 
 void ATDSLPlayerCharacter::SendAbilityLocalInput(bool Value, int32 InputID)

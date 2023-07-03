@@ -34,7 +34,7 @@ void UTDSLGA_PlayerMove::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 			EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
 		}
 
-		PlayerCharacter = CastChecked<ACharacter>(ActorInfo->AvatarActor.Get());
+		PlayerCharacter = CastChecked<ATDSLCharacterBase>(ActorInfo->AvatarActor.Get());
 		PlayerController = CastChecked<ATDSLPlayerController>(ActorInfo->PlayerController);
 
 		ATOnTick = UTDSLAT_OnTick::AbilityTaskOnTick(this, FName());
@@ -43,10 +43,6 @@ void UTDSLGA_PlayerMove::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 
 		ATWaitPlayerStop = UTDSLAT_WaitPlayerStop::CreateWaitVelocityChange(this, FName());
 		ATWaitPlayerStop->OnVelocityChage.AddDynamic(this, &UTDSLGA_PlayerMove::OnMovementStop);
-
-		//ATWaitTag = UAbilityTask_WaitGameplayTagAdded::WaitGameplayTagAdd(this, BlockTag);
-		//ATWaitTag->Added.AddDynamic(this, &UTDSLGA_PlayerMove::OnMovementStop);
-		//ATWaitTag->ReadyForActivation();
 
 	}
 }
@@ -99,7 +95,10 @@ void UTDSLGA_PlayerMove::Move(float DeltaTime)
 	// If we hit a surface, cache the location
 	if (bHitSuccessful)
 	{
-		TargetActor = Cast<ATDSLCharacterBase>(Hit.GetActor());
+		if (Hit.GetActor() != PlayerCharacter)
+		{
+			TargetActor = Cast<ATDSLCharacterBase>(Hit.GetActor());
+		}
 		CachedDestination = Hit.Location;
 	}
 
@@ -113,8 +112,6 @@ void UTDSLGA_PlayerMove::Move(float DeltaTime)
 	{
 		PlayerController->ShowEnemyInfoHUD(TargetActor);
 	}
-	// set target marker ni
-
 }
 
 void UTDSLGA_PlayerMove::OnMovementStop()
