@@ -105,12 +105,14 @@ protected:
 	UPROPERTY()
 	class UTDSLFloatingHpBarWidget* UIFloatingHPBar;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "GAS|UI")
+	bool bDrawFloatingBar;
+
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "GAS|UI")
 	class UWidgetComponent* UIFloatingHPBarComponent;
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "GAS|UI")
 	float FloatingHPBarMultiSize{ 2.5f };
-
 
 	FDelegateHandle HealthChangedDelegateHandle;
 

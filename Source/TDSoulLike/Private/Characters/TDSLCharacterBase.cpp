@@ -205,7 +205,7 @@ void ATDSLCharacterBase::BeginPlay()
 	UIFloatingHPBarComponent->SetDrawSize(FVector2D(HPBarDrawSize));
 
 	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	if (PC && PC != GetController())
+	if (bDrawFloatingBar && PC && PC != GetController())
 	{
 		if (UIFloatingHPBarClass)
 		{
@@ -222,7 +222,6 @@ void ATDSLCharacterBase::BeginPlay()
 
 	// Attribute change callbacks
 	HealthChangedDelegateHandle = AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AttributeSetBase->GetHealthAttribute()).AddUObject(this, &ATDSLCharacterBase::HealthChanged);
-
 }
 
 void ATDSLCharacterBase::HealthChanged(const FOnAttributeChangeData& Data)
